@@ -5,19 +5,19 @@
   
 
   
-  <title>高并发系统02之高并发三大利器之降级 | 沉默者</title>
+  <title>高并发系统03之高并发三大利器之降级 | 沉默者</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
 <meta property="og:type" content="article">
-<meta property="og:title" content="高并发系统02之高并发三大利器之降级">
+<meta property="og:title" content="高并发系统03之高并发三大利器之降级">
 <meta property="og:url" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/index.html">
 <meta property="og:site_name" content="沉默者">
 <meta property="og:description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-07-09T08:27:03.000Z">
-<meta property="article:modified_time" content="2021-07-09T08:42:51.559Z">
+<meta property="article:published_time" content="2021-07-09T08:28:03.000Z">
+<meta property="article:modified_time" content="2021-07-09T09:17:28.380Z">
 <meta property="article:author" content="hepeng [smile.hepeng@qq.com]">
-<meta property="article:tag" content="高并发">
+<meta property="article:tag" content="高并发系统">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
@@ -70,7 +70,7 @@
         <section id="main"><article id="post-高并发系统03之高并发三大利器之降级" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" class="article-date">
-  <time datetime="2021-07-09T08:27:03.000Z" itemprop="datePublished">2021-07-09</time>
+  <time datetime="2021-07-09T08:28:03.000Z" itemprop="datePublished">2021-07-09</time>
 </a>
     
   </div>
@@ -81,7 +81,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      高并发系统02之高并发三大利器之降级
+      高并发系统03之高并发三大利器之降级
     </h1>
   
 
@@ -123,10 +123,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" data-id="ckqw3sjll0005sss71ryq4pg1" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" data-id="ckqw4lmt8000c0ws70jypd54u" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
 
     </footer>
   </div>
@@ -134,19 +134,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          高并发系统02之高并发三大利器之缓存
-        
-      </div>
-    </a>
   
-  
-    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">高并发系统01之高并发三大利器之限流</div>
+      <div class="article-nav-title">高并发系统02之高并发三大利器之缓存</div>
     </a>
   
 </nav>
@@ -165,7 +156,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DB/" rel="tag">DB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
     </div>
   </div>
 
@@ -175,7 +166,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 20px;">高并发</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 10px;">高并发系统</a>
+      <a href="/tags/DB/" style="font-size: 10px;">DB</a> <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 20px;">高并发系统</a>
     </div>
   </div>
 
@@ -197,11 +188,11 @@
       <ul>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统03之高并发三大利器之降级</a>
           </li>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统02之高并发三大利器之降级</a>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
           </li>
         
           <li>
@@ -213,7 +204,7 @@
           </li>
         
           <li>
-            <a href="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">Kafka为什么这么快</a>
+            <a href="/2021/07/09/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%9701%E4%B9%8BKafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">消息中间件Kafka系列01之Kafka为什么这么快</a>
           </li>
         
       </ul>
