@@ -9,7 +9,7 @@ tags: MySQL
 常见的报错信息为 Deadlock found when trying to get lock...  
 举例来说 A 事务持有 X1 锁 ，申请 X2 锁，B事务持有 X2 锁，申请 X1 锁。A 和 B 事务持有锁并且申请对方持有的锁进入循环等待，就造成了死锁。
 
-![死锁示例图](./pictures/img.png)
+![死锁示例图](MySQL死锁原理及其解决方案研究/img.png)
 
 如上图，是右侧的四辆汽车资源请求产生了回路现象，即死循环，导致了死锁。
 
@@ -24,11 +24,11 @@ tags: MySQL
 ## 案例一:事务并发 insert 唯一键冲突
 表结构如下所示:
 
-![事务并发insert表结构](./pictures/img_1.png)
+![事务并发insert表结构](MySQL死锁原理及其解决方案研究/img_1.png)
 
 测试用例如下:
 
-![事务并发insert测试用例](./pictures/img_2.png)
+![事务并发insert测试用例](MySQL死锁原理及其解决方案研究/img_2.png)
 
 日志分析如下:
 
@@ -41,11 +41,11 @@ tags: MySQL
 ## 案例二:先 update 再 insert 的并发死锁问题
 表结构如下，无数据:
 
-![先update再insert表结构](./pictures/img_3.png)
+![先update再insert表结构](MySQL死锁原理及其解决方案研究/img_3.png)
 
 测试用例如下:
 
-![先update再insert测试用例](./pictures/img_3.png)
+![先update再insert测试用例](MySQL死锁原理及其解决方案研究/img_3.png)
 
 死锁分析:
 可以看到两个事务 update 不存在的记录，先后获得间隙锁( gap 锁)，gap 锁之间是兼容的所以在update环节不会阻塞。
