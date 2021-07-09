@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>高并发系统02之高并发三大利器之降级 | 沉默者</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发系统02之高并发三大利器之降级">
+<meta property="og:url" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/index.html">
+<meta property="og:site_name" content="沉默者">
+<meta property="og:description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-09T08:27:03.000Z">
+<meta property="article:modified_time" content="2021-07-09T08:42:51.559Z">
+<meta property="article:author" content="hepeng [smile.hepeng@qq.com]">
+<meta property="article:tag" content="高并发">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">沉默者</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-高并发系统03之高并发三大利器之降级" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" class="article-date">
+  <time datetime="2021-07-09T08:27:03.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      高并发系统02之高并发三大利器之降级
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>高并发三大利器</strong></p>
+<ul>
+<li>缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
+<li>降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
+<li>限流  —  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
+</ul>
+<h3 id="什么是服务降级"><a href="#什么是服务降级" class="headerlink" title="什么是服务降级"></a>什么是服务降级</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">服务降级是当服务器压力剧增的情况下，根据当前业务情况及流量对一些服务和页面有策略的降级，以此释放服务器资源以保证核心任务的正常运行。</span><br></pre></td></tr></table></figure>
+<p>服务降级主要用于当整个微服务架构整体的负载超出了预设的上限阈值或即将到来的流量预计将会超过预设的阈值时，为了保证重要或基本的服务能正常运行，将一些 不重要 或 不紧急 的服务或任务进行服务的 <strong>延迟使用</strong> 或 <strong>暂停使用</strong>。</p>
+<p>降级就是为了解决资源不足和访问量增加的矛盾。</p>
+<h3 id="服务降级方式"><a href="#服务降级方式" class="headerlink" title="服务降级方式"></a>服务降级方式</h3><ul>
+<li><strong>延迟服务</strong>：定时任务处理、或者mq延时处理。比如新用户注册送多少优惠券可以提示用户优惠券会24小时到达用户账号中，我们可以选择再凌晨流量较小的时候，批量去执行送券</li>
+<li><strong>页面降级</strong>：页面点击按钮全部置灰，或者页面调整成为一个静态页面显示“系统正在维护中，。。。。”。</li>
+<li><strong>关闭非核心服务</strong>：比如电商关闭推荐服务、关闭运费险、退货退款等。保证主流程的核心服务下单付款就好。</li>
+<li><strong>写降级</strong>：比如秒杀抢购，我们可以只进行Cache的更新返回，然后通过mq异步扣减库存到DB，保证最终一致性即可，此时可以将DB降级为Cache。</li>
+<li><strong>读降级</strong>：比如多级缓存模式，如果后端服务有问题，可以降级为只读缓存，这种方式适用于对读一致性要求不高的场景。</li>
+</ul>
+<h3 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h3><h4 id="服务雪崩"><a href="#服务雪崩" class="headerlink" title="服务雪崩"></a>服务雪崩</h4><p>多个微服务之间调用的时候，比如A服务调用了B服务，B服务调用了C服务，然后C服务由于机器宕机或者网略故障， 然后就会导致B服务调用C服务的时候超时，然后A服务调用B服务也会超时，最终整个链路都不可用了，导致整个系统不可用就跟雪蹦一样。</p>
+<h4 id="雪崩效应产生的几种场景"><a href="#雪崩效应产生的几种场景" class="headerlink" title="雪崩效应产生的几种场景"></a>雪崩效应产生的几种场景</h4><p><strong>突增流量</strong>：比如一大波爬虫，或者黑客攻击等。<br><strong>程序bug</strong>：代码死循环，或者资源未释放等。<br><strong>硬件原因</strong>：机器宕机、机房断电、光纤被挖断等。  </p>
+<h4 id="服务熔断-1"><a href="#服务熔断-1" class="headerlink" title="服务熔断"></a>服务熔断</h4><p>熔断机制是应对雪崩效应的一种微服务链路保护机制，在互联网系统中当下游的服务因为某种原因突然变得不可用或响应过慢，上游服务为了保证自己整体服务的可用性，暂时不再继续调用目标服务，直接快速返回，快速释放资源。如果目标服务情况好转则恢复调用。</p>
+<h3 id="熔断和降级的比较"><a href="#熔断和降级的比较" class="headerlink" title="熔断和降级的比较"></a>熔断和降级的比较</h3><h4 id="共性"><a href="#共性" class="headerlink" title="共性"></a>共性</h4><ul>
+<li>目的很一致：都是从可用性可靠性着想，为防止系统的整体缓慢甚至崩溃，采用的技术手段，都是为了保证系统的稳定。</li>
+<li>最终表现类似:对于两者来说，最终让用户体验到的是某些功能暂时不可达或不可用；</li>
+<li>粒度一般都是服务级别:当然，业界也有不少更细粒度的做法，比如做到数据持久层（允许查询，不允许增删改）；</li>
+<li>自治性要求很高: 熔断模式一般都是服务基于策略的自动触发，比如</li>
+<li>降级虽说可人工干预，但在微服务架构下，完全靠人显然不可能，开关预置、配置中心都是必要手段；</li>
+</ul>
+<h4 id="差异性"><a href="#差异性" class="headerlink" title="差异性"></a>差异性</h4><ul>
+<li>触发原因不太一样，服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑；</li>
+<li>管理目标的层次不太一样，熔断其实是一个框架级的处理，每个微服务都需要（无层级之分），而降级一般需要对业务有层级之分（比如降级一般是从最外围服务开始）熔断是降级方式的一种体现。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" data-id="ckqw3sjll0005sss71ryq4pg1" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          高并发系统02之高并发三大利器之缓存
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">高并发系统01之高并发三大利器之限流</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 20px;">高并发</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 10px;">高并发系统</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统02之高并发三大利器之降级</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/">高并发系统01之高并发三大利器之限流</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/">高并发系统00之如何设计一个高并发系统</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">Kafka为什么这么快</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2021 hepeng [smile.hepeng@qq.com]<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

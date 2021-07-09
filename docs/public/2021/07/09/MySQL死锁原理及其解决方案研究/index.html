@@ -14,17 +14,17 @@
 <meta property="og:site_name" content="沉默者">
 <meta property="og:description" content="什么是死锁死锁是并发系统中常见的问题，同样也会出现在数据库MySQL的并发读写请求场景中。当两个及以上的事务，双方都在等待对方释放已经持有的锁或因为加锁顺序不一致造成循环等待锁资源，就会出现“死锁”。常见的报错信息为 Deadlock found when trying to get lock…举例来说 A 事务持有 X1 锁 ，申请 X2 锁，B事务持有 X2 锁，申请 X1 锁。A 和 B 事">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img.png">
-<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img_1.png">
-<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img_2.png">
-<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img_3.png">
-<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img_3.png">
+<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img.png">
+<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_1.png">
+<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_2.png">
+<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_3.png">
+<meta property="og:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_4.png">
 <meta property="article:published_time" content="2021-07-09T05:36:08.000Z">
-<meta property="article:modified_time" content="2021-07-09T06:13:36.232Z">
+<meta property="article:modified_time" content="2021-07-09T07:22:48.004Z">
 <meta property="article:author" content="hepeng [smile.hepeng@qq.com]">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/MySQL死锁原理及其解决方案研究/img.png">
+<meta name="twitter:image" content="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img.png">
   
     <link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
   
@@ -37,7 +37,7 @@
   
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+</head>
 
 <body>
   <div id="container">
@@ -96,7 +96,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="什么是死锁"><a href="#什么是死锁" class="headerlink" title="什么是死锁"></a>什么是死锁</h1><p>死锁是并发系统中常见的问题，同样也会出现在数据库MySQL的并发读写请求场景中。<br>当两个及以上的事务，双方都在等待对方释放已经持有的锁或因为加锁顺序不一致造成循环等待锁资源，就会出现“死锁”。<br>常见的报错信息为 Deadlock found when trying to get lock…<br>举例来说 A 事务持有 X1 锁 ，申请 X2 锁，B事务持有 X2 锁，申请 X1 锁。A 和 B 事务持有锁并且申请对方持有的锁进入循环等待，就造成了死锁。</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img.png" alt="死锁示例图"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img.png" alt="死锁示例图"></p>
 <p>如上图，是右侧的四辆汽车资源请求产生了回路现象，即死循环，导致了死锁。</p>
 <h1 id="死锁出现要素"><a href="#死锁出现要素" class="headerlink" title="死锁出现要素"></a>死锁出现要素</h1><ul>
 <li>两个或者两个以上事务</li>
@@ -105,9 +105,9 @@
 <li>事务之间因为持有锁和申请锁导致彼此循环等待</li>
 </ul>
 <h1 id="经典案例"><a href="#经典案例" class="headerlink" title="经典案例"></a>经典案例</h1><h2 id="案例一-事务并发-insert-唯一键冲突"><a href="#案例一-事务并发-insert-唯一键冲突" class="headerlink" title="案例一:事务并发 insert 唯一键冲突"></a>案例一:事务并发 insert 唯一键冲突</h2><p>表结构如下所示:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_1.png" alt="事务并发insert表结构"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_1.png" alt="事务并发insert表结构"></p>
 <p>测试用例如下:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_2.png" alt="事务并发insert测试用例"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_2.png" alt="事务并发insert测试用例"></p>
 <p>日志分析如下:</p>
 <ul>
 <li><p>事务 T2 insert into t7(id,a) values (26,10) 语句 insert 成功，持有 a=10 的 排他行锁( Xlocks rec but no gap )</p>
@@ -118,9 +118,9 @@
 </li>
 </ul>
 <h2 id="案例二-先-update-再-insert-的并发死锁问题"><a href="#案例二-先-update-再-insert-的并发死锁问题" class="headerlink" title="案例二:先 update 再 insert 的并发死锁问题"></a>案例二:先 update 再 insert 的并发死锁问题</h2><p>表结构如下，无数据:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_3.png" alt="先update再insert表结构"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_3.png" alt="先update再insert表结构"></p>
 <p>测试用例如下:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_3.png" alt="先update再insert测试用例"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_4.png" alt="先update再insert测试用例"></p>
 <p>死锁分析:<br>可以看到两个事务 update 不存在的记录，先后获得间隙锁( gap 锁)，gap 锁之间是兼容的所以在update环节不会阻塞。</p>
 <p>两者都持有 gap 锁，然后去竞争插入意向锁。当存在其他会话持有 gap 锁的时候，当前会话申请不了插入意向锁，导致死锁。</p>
 <h1 id="如何尽可能避免死锁"><a href="#如何尽可能避免死锁" class="headerlink" title="如何尽可能避免死锁"></a>如何尽可能避免死锁</h1><ul>
@@ -143,7 +143,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/" data-id="ckqvzbamh00000cs7064w9kpr" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/" data-id="ckqw3sjld0000sss7gmx96dyo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li></ul>
@@ -164,11 +164,6 @@
     </a>
   
   
-    <a href="/2021/07/09/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
-    </a>
-  
 </nav>
 
   
@@ -185,7 +180,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
     </div>
   </div>
 
@@ -195,7 +190,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a>
+      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 20px;">高并发</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 10px;">高并发系统</a>
     </div>
   </div>
 
@@ -217,15 +212,23 @@
       <ul>
         
           <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统02之高并发三大利器之降级</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/">高并发系统01之高并发三大利器之限流</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/">高并发系统00之如何设计一个高并发系统</a>
+          </li>
+        
+          <li>
             <a href="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">Kafka为什么这么快</a>
-          </li>
-        
-          <li>
-            <a href="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/">MySQL死锁及其解决方案研究</a>
-          </li>
-        
-          <li>
-            <a href="/2021/07/09/hello-world/">Hello World</a>
           </li>
         
       </ul>

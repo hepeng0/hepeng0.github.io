@@ -29,7 +29,7 @@
   
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+</head>
 
 <body>
   <div id="container">
@@ -67,6 +67,295 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-高并发系统02之高并发三大利器之缓存" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" class="article-date">
+  <time datetime="2021-07-09T08:27:12.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>高并发三大利器</strong></p>
+<ul>
+<li>缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
+<li>降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
+<li>限流  —  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
+</ul>
+<h2 id="缓存分类"><a href="#缓存分类" class="headerlink" title="缓存分类"></a>缓存分类</h2><ul>
+<li>分布式缓存： 如redis、memcached等</li>
+<li>本地（进程内）缓存： 如ehcache、GuavaCache、Caffeine等</li>
+</ul>
+<h2 id="缓存特性"><a href="#缓存特性" class="headerlink" title="缓存特性"></a>缓存特性</h2><h3 id="命中率"><a href="#命中率" class="headerlink" title="命中率"></a>命中率</h3><p>命中率=命中数/（命中数+没有命中数）当某个请求能够通过访问缓存而得到响应时，称为缓存命中。缓存命中率越高，缓存的利用率也就越高。</p>
+<h3 id="最大空间"><a href="#最大空间" class="headerlink" title="最大空间"></a>最大空间</h3><p>缓存中可以容纳最大元素的数量。当缓存存放的数据超过最大空间时，就需要根据淘汰算法来淘汰部分数据存放新到达的数据。</p>
+<h3 id="淘汰算法"><a href="#淘汰算法" class="headerlink" title="淘汰算法"></a>淘汰算法</h3><p>缓存的存储空间有限制，当缓存空间被用满时，如何保证在稳定服务的同时有效提升命中率？这就由缓存淘汰算法来处理，设计适合自身数据特征的淘汰算法能够有效提升缓存命中率。<br>常见的淘汰算法有：</p>
+<ul>
+<li><p>FIFO(first in first out)「先进先出」<br>最先进入缓存的数据在缓存空间不够的情况下（超出最大元素限制）会被优先被清除掉，以腾出新的空间接受新的数据。策略算法主要比较缓存元素的创建时间。「适用于保证高频数据有效性场景，优先保障最新数据可用」。</p>
+</li>
+<li><p>LFU(less frequently used)「最少使用」<br>无论是否过期，根据元素的被使用次数判断，清除使用次数较少的元素释放空间。策略算法主要比较元素的hitCount（命中次数）。「适用于保证高频数据有效性场景」。</p>
+</li>
+<li><p>LRU(least recently used)「最近最少使用」<br>无论是否过期，根据元素最后一次被使用的时间戳，清除最远使用时间戳的元素释放空间。策略算法主要比较元素最近一次被get使用时间。「比较适用于热点数据场景，优先保证热点数据的有效性。」</p>
+</li>
+</ul>
+<h2 id="本地缓存"><a href="#本地缓存" class="headerlink" title="本地缓存"></a>本地缓存</h2><p>常见本地缓存有以下几种实现方式：</p>
+<img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png" class>
+<p>其中性能最佳的是Caffeine，了解更详细信息参考： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIyMjQwMTgyNA==&amp;mid=2247483811&amp;idx=1&amp;sn=9d0b207044b5fe447169d630a7f77aab&amp;scene=21#wechat_redirect">本地缓存性能之王</a></p>
+<h2 id="分布式缓存"><a href="#分布式缓存" class="headerlink" title="分布式缓存"></a>分布式缓存</h2><p>分布式缓存详细信息参考redis系列文章</p>
+<h2 id="缓存更新方案"><a href="#缓存更新方案" class="headerlink" title="缓存更新方案"></a>缓存更新方案</h2><p>我们一般的缓存更新主要有以下几种更新策略：</p>
+<ul>
+<li>先更新缓存，再更新数据库</li>
+<li>先更新数据库，再更新缓存</li>
+<li>先删除缓存，再更新数据库</li>
+<li>先更新数据源库，再删除缓存</li>
+</ul>
+<p>至于选择哪种更新策略的话，没有绝对的选择，可以根据自己的业务情况来选择适合自己的。<br>不过一般推荐的话是选择 「<strong>先更新数据源库，再删除缓存</strong>」。</p>
+<h2 id="缓存常见问题"><a href="#缓存常见问题" class="headerlink" title="缓存常见问题"></a>缓存常见问题</h2><h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><p>大量查询数据库不存在数据，缓存无数据，大量无效请求落库。</p>
+<p>解决方案</p>
+<ul>
+<li>数据库不存在数据写空值入缓存</li>
+</ul>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><p>大规模缓存崩溃，大量请求落库。</p>
+<p>解决方案</p>
+<ul>
+<li>事前：redis 高可用，主从+哨兵，redis cluster，避免全盘崩溃。</li>
+<li>事中：本地 ehcache 缓存 + hystrix 限流&amp;降级，避免 MySQL 被打死。</li>
+<li>事后：redis 持久化，一旦重启，自动从磁盘上加载数据，快速恢复缓存数据。</li>
+</ul>
+<h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><p>热点key失效瞬间大量请求落库。</p>
+<p>解决方案</p>
+<ul>
+<li>基本不会发生更新的，则可尝试将该热点数据设置为永不过期。</li>
+<li>更新不频繁且更新时间段，加互斥锁保证少量请求重建缓存。</li>
+<li>数据更新频繁或更新时间长，定时线程主动重建缓存。</li>
+</ul>
+<h3 id="缓存双写一致性"><a href="#缓存双写一致性" class="headerlink" title="缓存双写一致性"></a>缓存双写一致性</h3><p>缓存使用方法：<br>读的时候，先读缓存，缓存没有的话，就读数据库，然后取出数据后放入缓存，同时返回响应。<br>更新的时候，先更新数据库，然后再删除缓存。</p>
+<p>不一致解决方案</p>
+<ul>
+<li>初级：先删除缓存，再更新数据库。</li>
+<li>高并发：使用队列做轻异步，多个并发更新请求阻塞过滤。（必须压测防止长时间阻塞积压）</li>
+</ul>
+<h3 id="redis并发竞争"><a href="#redis并发竞争" class="headerlink" title="redis并发竞争"></a>redis并发竞争</h3><p>多客户端同时并发写key，后来的数据先改。</p>
+<p>解决方案：</p>
+<ul>
+<li>Redis存在CAS方案</li>
+<li>实现分布式锁</li>
+<li>写前判断版本号</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" data-id="ckqw3sjlt000fsss7h97f27iw" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-高并发系统03之高并发三大利器之降级" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" class="article-date">
+  <time datetime="2021-07-09T08:27:03.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统02之高并发三大利器之降级</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>高并发三大利器</strong></p>
+<ul>
+<li>缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
+<li>降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
+<li>限流  —  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
+</ul>
+<h3 id="什么是服务降级"><a href="#什么是服务降级" class="headerlink" title="什么是服务降级"></a>什么是服务降级</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">服务降级是当服务器压力剧增的情况下，根据当前业务情况及流量对一些服务和页面有策略的降级，以此释放服务器资源以保证核心任务的正常运行。</span><br></pre></td></tr></table></figure>
+<p>服务降级主要用于当整个微服务架构整体的负载超出了预设的上限阈值或即将到来的流量预计将会超过预设的阈值时，为了保证重要或基本的服务能正常运行，将一些 不重要 或 不紧急 的服务或任务进行服务的 <strong>延迟使用</strong> 或 <strong>暂停使用</strong>。</p>
+<p>降级就是为了解决资源不足和访问量增加的矛盾。</p>
+<h3 id="服务降级方式"><a href="#服务降级方式" class="headerlink" title="服务降级方式"></a>服务降级方式</h3><ul>
+<li><strong>延迟服务</strong>：定时任务处理、或者mq延时处理。比如新用户注册送多少优惠券可以提示用户优惠券会24小时到达用户账号中，我们可以选择再凌晨流量较小的时候，批量去执行送券</li>
+<li><strong>页面降级</strong>：页面点击按钮全部置灰，或者页面调整成为一个静态页面显示“系统正在维护中，。。。。”。</li>
+<li><strong>关闭非核心服务</strong>：比如电商关闭推荐服务、关闭运费险、退货退款等。保证主流程的核心服务下单付款就好。</li>
+<li><strong>写降级</strong>：比如秒杀抢购，我们可以只进行Cache的更新返回，然后通过mq异步扣减库存到DB，保证最终一致性即可，此时可以将DB降级为Cache。</li>
+<li><strong>读降级</strong>：比如多级缓存模式，如果后端服务有问题，可以降级为只读缓存，这种方式适用于对读一致性要求不高的场景。</li>
+</ul>
+<h3 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h3><h4 id="服务雪崩"><a href="#服务雪崩" class="headerlink" title="服务雪崩"></a>服务雪崩</h4><p>多个微服务之间调用的时候，比如A服务调用了B服务，B服务调用了C服务，然后C服务由于机器宕机或者网略故障， 然后就会导致B服务调用C服务的时候超时，然后A服务调用B服务也会超时，最终整个链路都不可用了，导致整个系统不可用就跟雪蹦一样。</p>
+<h4 id="雪崩效应产生的几种场景"><a href="#雪崩效应产生的几种场景" class="headerlink" title="雪崩效应产生的几种场景"></a>雪崩效应产生的几种场景</h4><p><strong>突增流量</strong>：比如一大波爬虫，或者黑客攻击等。<br><strong>程序bug</strong>：代码死循环，或者资源未释放等。<br><strong>硬件原因</strong>：机器宕机、机房断电、光纤被挖断等。  </p>
+<h4 id="服务熔断-1"><a href="#服务熔断-1" class="headerlink" title="服务熔断"></a>服务熔断</h4><p>熔断机制是应对雪崩效应的一种微服务链路保护机制，在互联网系统中当下游的服务因为某种原因突然变得不可用或响应过慢，上游服务为了保证自己整体服务的可用性，暂时不再继续调用目标服务，直接快速返回，快速释放资源。如果目标服务情况好转则恢复调用。</p>
+<h3 id="熔断和降级的比较"><a href="#熔断和降级的比较" class="headerlink" title="熔断和降级的比较"></a>熔断和降级的比较</h3><h4 id="共性"><a href="#共性" class="headerlink" title="共性"></a>共性</h4><ul>
+<li>目的很一致：都是从可用性可靠性着想，为防止系统的整体缓慢甚至崩溃，采用的技术手段，都是为了保证系统的稳定。</li>
+<li>最终表现类似:对于两者来说，最终让用户体验到的是某些功能暂时不可达或不可用；</li>
+<li>粒度一般都是服务级别:当然，业界也有不少更细粒度的做法，比如做到数据持久层（允许查询，不允许增删改）；</li>
+<li>自治性要求很高: 熔断模式一般都是服务基于策略的自动触发，比如</li>
+<li>降级虽说可人工干预，但在微服务架构下，完全靠人显然不可能，开关预置、配置中心都是必要手段；</li>
+</ul>
+<h4 id="差异性"><a href="#差异性" class="headerlink" title="差异性"></a>差异性</h4><ul>
+<li>触发原因不太一样，服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑；</li>
+<li>管理目标的层次不太一样，熔断其实是一个框架级的处理，每个微服务都需要（无层级之分），而降级一般需要对业务有层级之分（比如降级一般是从最外围服务开始）熔断是降级方式的一种体现。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/" data-id="ckqw3sjll0005sss71ryq4pg1" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-高并发系统01之高并发三大利器之限流" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/" class="article-date">
+  <time datetime="2021-07-09T07:54:02.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/">高并发系统01之高并发三大利器之限流</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>高并发三大利器</strong></p>
+<ul>
+<li>缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
+<li>降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
+<li>限流  —  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
+</ul>
+<h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><h3 id="快速失败-–-滑动时间窗口"><a href="#快速失败-–-滑动时间窗口" class="headerlink" title="快速失败 – 滑动时间窗口"></a>快速失败 – 滑动时间窗口</h3><p>滑动窗口算法是将时间周期分为N个小周期，分别记录每个小周期内访问次数，并且根据时间滑动删除过期的小周期<br><img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/滑动时间窗口.png" alt></p>
+<h3 id="排队等待-漏桶算法"><a href="#排队等待-漏桶算法" class="headerlink" title="排队等待 - 漏桶算法"></a>排队等待 - 漏桶算法</h3><p>漏桶算法思路很简单，水（请求）先进入到漏桶里，漏桶以一定的速度出水，当水流入速度过大会直接溢出，可以看出漏桶算法能强行限制数据的传输速率。<br><img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/漏桶算法.png" alt="漏桶算法"></p>
+<p>首先，我们有一个固定容量的桶，有水流进来，也有水流出去。对于流进来的水来说，我们无法预计一共有多少水会流进来，也无法预计水流的速度。但是对于流出去的水来说，这个桶可以固定水流出的速率。而且，当桶满了之后，多余的水将会溢出。</p>
+<p>我们将算法中的水换成实际应用中的请求，我们可以看到漏桶算法天生就限制了请求的速度。当使用了漏桶算法，我们可以保证接口会以一个常速速率来处理请求。所以漏桶算法天生不会出现临界问题。<br>漏桶算法可以粗略的认为就是注水漏水过程，往桶中<strong>以一定速率流出水，以任意速率流入水</strong>，当水超过桶流量则丢弃，因为桶容量是不变的，保证了整体的速率。</p>
+<h3 id="Warm-Up-令牌桶算法"><a href="#Warm-Up-令牌桶算法" class="headerlink" title="Warm Up - 令牌桶算法"></a>Warm Up - 令牌桶算法</h3><p>首先，我们有一个固定容量的桶，桶里存放着令牌（token）。<br>桶一开始是空的，token以 一个固定的速率r往桶里填充，直到达到桶的容量，多余的令牌将会被丢弃。<br>每当一个请求过来时，就会尝试从桶里移除一个令牌，如果没有令牌的话，请求无法通过。</p>
+<p><img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/aegar-6o1hz.png" alt></p>
+<h4 id="解决问题："><a href="#解决问题：" class="headerlink" title="解决问题："></a>解决问题：</h4><ul>
+<li>Warm Up（冷启动/预热）：通过”冷启动”，让通过的流量缓慢增加，在一定时间内逐渐增加到阈值上限，给冷系统一个预热的时间，避免冷系统被压垮。</li>
+</ul>
+<h3 id="各算法适用场景"><a href="#各算法适用场景" class="headerlink" title="各算法适用场景"></a>各算法适用场景</h3><ul>
+<li>计数法用于简单粗暴的连接池数量等。</li>
+<li>令牌桶可以用来保护自己，主要用来对调用者频率进行限流，为的是让自己不被打垮。所以如果自己本身有处理能力的时候，如果流量突发（实际消费能力强于配置的流量限制），那么实际处理速率可以超过配置的限制。</li>
+<li>漏桶算法，这是用来保护他人，也就是保护他所调用的系统。主要场景是，当调用的第三方系统本身没有保护机制，或者有流量限制的时候，我们的调用速度不能超过他的限制，由于我们不能更改第三方系统，所以只有在主调方控制。这个时候，即使流量突发，也必须舍弃。因为消费能力是第三方决定的。</li>
+</ul>
+<p><strong> 简单粗暴场景用计数法。如果要让自己的系统不被打垮，用令牌桶。如果保证别人的系统不被打垮，用漏桶。</strong></p>
+<h2 id="流量控制组件对比"><a href="#流量控制组件对比" class="headerlink" title="流量控制组件对比"></a>流量控制组件对比</h2><p><img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/aegar-6o1hz.png" alt></p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xuwc/p/9123078.html">高并发系统限流-漏桶算法和令牌桶算法</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/" data-id="ckqw3sjll0004sss7bwyu9ydj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-高并发系统00之如何设计一个高并发系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time datetime="2021-07-09T07:08:32.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/">高并发系统00之如何设计一个高并发系统</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>为啥会有高并发？为啥高并发就很牛逼？</p>
+<p>很简单，就是因为刚开始系统都是连接数据库的，但是要知道数据库支撑到每秒并发两三千的时候，基本就快完了。<br>所以才有说，很多公司，刚开始干的时候，技术比较 low，结果业务发展太快，有的时候系统扛不住压力就挂了。</p>
+<p>设计一个高并发系统可以简单分为以下 6 点：</p>
+<ul>
+<li>系统拆分</li>
+<li>缓存</li>
+<li>MQ</li>
+<li>分库分表</li>
+<li>读写分离</li>
+<li>ElasticSearch</li>
+</ul>
+<img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/img_1.png" class title="img.png">
+<h3 id="系统拆分"><a href="#系统拆分" class="headerlink" title="系统拆分"></a>系统拆分</h3><p>将一个系统拆分为多个子系统，用 dubbo 来搞。然后每个系统连一个数据库，这样本来就一个库，现在多个数据库，不也可以扛高并发么。</p>
+<h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>缓存，必须得用缓存。大部分的高并发场景，都是读多写少，那你完全可以在数据库和缓存里都写一份，然后读的时候大量走缓存不就得了。毕竟人家 redis 轻轻松松单机几万的并发。所以你可以考虑考虑你的项目里，那些承载主要请求的读场景，怎么用缓存来抗高并发。</p>
+<h3 id="MQ"><a href="#MQ" class="headerlink" title="MQ"></a>MQ</h3><p>MQ，必须得用 MQ。可能你还是会出现高并发写的场景，比如说一个业务操作里要频繁搞数据库几十次，增删改增删改，疯了。那高并发绝对搞挂你的系统，你要是用 redis 来承载写那肯定不行，人家是缓存，数据随时就被 LRU 了，数据格式还无比简单，没有事务支持。所以该用 mysql 还得用 mysql 啊。那你咋办？用 MQ 吧，大量的写请求灌入 MQ 里，排队慢慢玩儿，后边系统消费后慢慢写，控制在 mysql 承载范围之内。所以你得考虑考虑你的项目里，那些承载复杂写业务逻辑的场景里，如何用 MQ 来异步写，提升并发性。MQ 单机抗几万并发也是 ok 的，这个之前还特意说过。</p>
+<h3 id="分库分表"><a href="#分库分表" class="headerlink" title="分库分表"></a>分库分表</h3><p>分库分表，可能到了最后数据库层面还是免不了抗高并发的要求，好吧，那么就将一个数据库拆分为多个库，多个库来扛更高的并发；然后将一个表拆分为多个表，每个表的数据量保持少一点，提高 sql 跑的性能。</p>
+<h3 id="读写分离"><a href="#读写分离" class="headerlink" title="读写分离"></a>读写分离</h3><p>读写分离，这个就是说大部分时候数据库可能也是读多写少，没必要所有请求都集中在一个库上吧，可以搞个主从架构，主库写入，从库读取，搞一个读写分离。读流量太多的时候，还可以加更多的从库。</p>
+<h3 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h3><p>Elasticsearch，简称 ES。</p>
+<p>ES 是分布式的，可以随便扩容，分布式天然就可以支撑高并发，因为动不动就可以扩容加机器来扛更高的并发。那么一些比较简单的查询、统计类的操作，可以考虑用 es 来承载，还有一些全文搜索类的操作，也可以考虑用 es 来承载。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" data-id="ckqw3sjlh0001sss75umj29y3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Kafka为什么这么快" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/" class="article-date">
@@ -89,7 +378,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Kafka为什么这么快"><a href="#Kafka为什么这么快" class="headerlink" title="Kafka为什么这么快"></a>Kafka为什么这么快</h1><ul>
+        <ul>
 <li>partition 并行处理</li>
 <li>顺序写磁盘，充分利用磁盘特性</li>
 <li>利用了现代操作系统分页存储 Page Cache 来利用内存提高 I/O 效率</li>
@@ -102,13 +391,13 @@
 <p>Topic 只是一个逻辑的概念。每个 Topic 都包含一个或多个 Partition，不同 Partition 可位于不同节点。</p>
 <p>一方面，由于不同 Partition 可位于不同机器，因此可以充分利用集群优势，实现机器间的并行处理。另一方面，由于 Partition 在物理上对应一个文件夹，即使多个 Partition 位于同一个节点，也可通过配置让同一节点上的不同 Partition 置于不同的磁盘上，从而实现磁盘间的并行处理，充分发挥多磁盘的优势。</p>
 <p>能并行处理，速度肯定会有提升，多个工人肯定比一个工人干的快。</p>
-<h3 id="顺序写磁盘"><a href="#顺序写磁盘" class="headerlink" title="顺序写磁盘"></a>顺序写磁盘</h3><p><img src="Kafka为什么这么快/img.png" alt="img.png"><br>Kafka 中每个分区是一个有序的，不可变的消息序列，新的消息不断追加到 partition 的末尾，这个就是顺序写。</p>
+<h3 id="顺序写磁盘"><a href="#顺序写磁盘" class="headerlink" title="顺序写磁盘"></a>顺序写磁盘</h3><p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img.png" alt><br>Kafka 中每个分区是一个有序的，不可变的消息序列，新的消息不断追加到 partition 的末尾，这个就是顺序写。</p>
 <p>由于磁盘有限，不可能保存所有数据，实际上作为消息系统 Kafka 也没必要保存所有数据，需要删除旧的数据。</p>
 <p>又由于顺序写入的原因，所以 Kafka 采用各种删除策略删除数据的时候，并非通过使用“读 - 写”模式去修改文件，而是将 Partition 分为多个 Segment，每个 Segment 对应一个物理文件，通过删除整个文件的方式去删除 Partition 内的数据。这种方式清除旧数据的方式，也避免了对文件的随机写操作。</p>
 <h4 id="简单扯扯磁盘-IO-的那些事"><a href="#简单扯扯磁盘-IO-的那些事" class="headerlink" title="简单扯扯磁盘/IO 的那些事"></a>简单扯扯磁盘/IO 的那些事</h4><p>硬盘性能的制约因素是什么？如何根据磁盘I/O特性来进行系统设计？<br>硬盘内部主要部件为磁盘盘片、传动手臂、读写磁头和主轴马达。<br>实际数据都是写在盘片上，读写主要是通过传动手臂上的读写磁头来完成。实际运行时，主轴让磁盘盘片转动，然后传动手臂可伸展让读取头在盘片上进行读写操作。磁盘物理结构如下图所示：</p>
-<p><img src="Kafka为什么这么快/img2.png" alt="img.png"></p>
+<p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img2.png" alt></p>
 <p>由于单一盘片容量有限，一般硬盘都有两张以上的盘片，每个盘片有两面，都可记录信息，所以一张盘片对应着两个磁头。盘片被分为许多扇形的区域，每个区域叫一个扇区。盘片表面上以盘片中心为圆心，不同半径的同心圆称为磁道，不同盘片相同半径的磁道所组成的圆柱称为柱面。磁道与柱面都是表示不同半径的圆，在许多场合，磁道和柱面可以互换使用。磁盘盘片垂直视角如下图所示：</p>
-<p><img src="Kafka为什么这么快/img1.png" alt="img.png"></p>
+<p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img1.png" alt></p>
 <p>影响磁盘的关键因素是磁盘服务时间，即磁盘完成一个I/O请求所花费的时间，它由寻道时间、旋转延迟和数据传输时间三部分构成。<br>机械硬盘的连续读写性能很好，但随机读写性能很差，这主要是因为磁头移动到正确的磁道上需要时间，随机读写时，磁头需要不停的移动，时间都浪费在了磁头寻址上，所以性能不高。衡量磁盘的重要主要指标是IOPS和吞吐量。<br>在许多的开源框架如 Kafka、HBase 中，都通过追加写的方式来尽可能的将随机 I/O 转换为顺序 I/O，以此来降低寻址时间和旋转延时，从而最大限度的提高 IOPS。  </p>
 <p>感兴趣的同学可以看看 <a href="https://link.zhihu.com/?target=https%3A//tech.meituan.com/2017/05/19/about-desk-io.html">磁盘I/O那些事</a></p>
 <p>磁盘读写的快慢取决于你怎么使用它，也就是顺序读写或者随机读写。</p>
@@ -139,12 +428,12 @@
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DMA（Direct Memory Access）：直接存储器访问。DMA 是一种无需 CPU 的参与，让外设和系统内存之间进行双向数据传输的硬件机制。使用 DMA 可以使系统 CPU 从实际的 I/O 数据传输过程中摆脱出来，从而大大提高系统的吞吐率。</span><br></pre></td></tr></table></figure>
 <p>其中伴随着四次上下文切换，如图所示</p>
-<p><img src="Kafka为什么这么快/img3.png" alt="img.png"></p>
+<p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img3.png" alt></p>
 <p>数据落盘通常都是非实时的，kafka 生产者数据持久化也是如此。Kafka 的数据并不是实时的写入硬盘，它充分利用了现代操作系统分页存储来利用内存提高 I/O 效率，就是上一节提到的 Page Cache。</p>
 <p>对于 kafka 来说，Producer 生产的数据存到 broker，这个过程读取到 socket buffer 的网络数据，其实可以直接在内核空间完成落盘。并没有必要将 socket buffer 的网络数据，读取到应用进程缓冲区；在这里应用进程缓冲区其实就是 broker，broker 收到生产者的数据，就是为了持久化。</p>
 <p><strong>在此特殊场景下</strong>：接收来自 socket buffer 的网络数据，应用进程不需要中间处理、直接进行持久化时。可以使用 <strong>mmpp</strong> 内存文件映射。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Memory Mapped Files：简称 mmap，也有叫 MMFile 的，使用 mmap 的目的是将内核中读缓冲区（read buffer）的地址与用户空间的缓冲区（user buffer）进行映射。从而实现内核缓冲区与应用程序内存的共享，省去了将数据从内核读缓冲区（read buffer）拷贝到用户缓冲区（user buffer）的过程。它的工作原理是直接利用操作系统的 Page 来实现文件到物理内存的直接映射。完成映射之后你对物理内存的操作会被同步到硬盘上。</span><br><span class="line">使用这种方式可以获取很大的 I/O 提升，省去了用户空间到内核空间复制的开销。</span><br><span class="line">mmap 也有一个很明显的缺陷——不可靠，写到 mmap 中的数据并没有被真正的写到硬盘，操作系统会在程序主动调用 flush 的时候才把数据真正的写到硬盘。Kafka 提供了一个参数——producer.type 来控制是不是主动flush；如果 Kafka 写入到 mmap 之后就立即 flush 然后再返回 Producer 叫同步(sync)；写入 mmap 之后立即返回 Producer 不调用 flush 就叫异步(async)，默认是 sync。</span><br></pre></td></tr></table></figure>
-<p><img src="Kafka为什么这么快/img4.png" alt="img.png"></p>
+<p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img4.png" alt></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">零拷贝（Zero-copy）技术指在计算机执行操作时，CPU 不需要先将数据从一个内存区域复制到另一个内存区域，从而可以减少上下文切换以及 CPU 的拷贝时间。</span><br><span class="line">它的作用是在数据报从网络设备到用户程序空间传递的过程中，减少数据拷贝次数，减少系统调用，实现 CPU 的零参与，彻底消除 CPU 在这方面的负载。</span><br><span class="line">目前零拷贝技术主要有三种类型：</span><br><span class="line">直接I/O：</span><br><span class="line">        数据直接跨过内核，在用户地址空间与I/O设备之间传递，内核只是进行必要的虚拟存储配置等辅助工作；</span><br><span class="line">避免内核和用户空间之间的数据拷贝：</span><br><span class="line">        当应用程序不需要对数据进行访问时，则可以避免将数据从内核空间拷贝到用户空间</span><br><span class="line">        * mmap</span><br><span class="line">        * sendfile</span><br><span class="line">        * splice &amp;&amp; tee</span><br><span class="line">        * sockmap</span><br><span class="line">copy on write：</span><br><span class="line">        写时拷贝技术，数据不需要提前拷贝，而是当需要修改的时候再进行部分拷贝。</span><br></pre></td></tr></table></figure>
 <h4 id="2-磁盘文件通过网络发送（Broker-到-Consumer）"><a href="#2-磁盘文件通过网络发送（Broker-到-Consumer）" class="headerlink" title="2) 磁盘文件通过网络发送（Broker 到 Consumer）"></a>2) 磁盘文件通过网络发送（Broker 到 Consumer）</h4><p>传统方式实现：先读取磁盘、再用 socket 发送，实际也是进过四次 copy<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">buffer = File.read</span><br><span class="line">Socket.send(buffer)</span><br></pre></td></tr></table></figure><br>这一过程可以类比上边的生产消息：</p>
 <ul>
@@ -154,7 +443,7 @@
 <li>最后通过 DMA 拷贝将数据拷贝到 NIC Buffer </li>
 </ul>
 <p>Linux 2.4+ 内核通过 sendfile 系统调用，提供了零拷贝。数据通过 DMA 拷贝到内核态 Buffer 后，直接通过 DMA 拷贝到 NIC Buffer，无需 CPU 拷贝。这也是零拷贝这一说法的来源。除了减少数据拷贝外，因为整个读文件 - 网络发送由一个 sendfile 调用完成，整个过程只有两次上下文切换，因此大大提高了性能。</p>
-<p><img src="Kafka为什么这么快/img5.png" alt="img.png"></p>
+<p><img src="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/img5.png" alt></p>
 <p>Kafka 在这里采用的方案是通过 NIO 的 transferTo/transferFrom 调用操作系统的 sendfile 实现零拷贝。总共发生 2 次内核数据拷贝、2 次上下文切换和一次系统调用，消除了 CPU 数据拷贝</p>
 <h3 id="批处理"><a href="#批处理" class="headerlink" title="批处理"></a>批处理</h3><p>在很多情况下，系统的瓶颈不是 CPU 或磁盘，而是网络IO。</p>
 <p>因此，除了操作系统提供的低级批处理之外，Kafka 的客户端和 broker 还会在通过网络发送数据之前，在一个批处理中累积多条记录 (包括读和写)。记录的批处理分摊了网络往返的开销，使用了更大的数据包从而提高了带宽利用率。</p>
@@ -163,7 +452,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/" data-id="ckqvzbamo00040cs7f9fr7qq9" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/" data-id="ckqw3sjlk0003sss798q90o8x" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li></ul>
@@ -198,7 +487,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="什么是死锁"><a href="#什么是死锁" class="headerlink" title="什么是死锁"></a>什么是死锁</h1><p>死锁是并发系统中常见的问题，同样也会出现在数据库MySQL的并发读写请求场景中。<br>当两个及以上的事务，双方都在等待对方释放已经持有的锁或因为加锁顺序不一致造成循环等待锁资源，就会出现“死锁”。<br>常见的报错信息为 Deadlock found when trying to get lock…<br>举例来说 A 事务持有 X1 锁 ，申请 X2 锁，B事务持有 X2 锁，申请 X1 锁。A 和 B 事务持有锁并且申请对方持有的锁进入循环等待，就造成了死锁。</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img.png" alt="死锁示例图"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img.png" alt="死锁示例图"></p>
 <p>如上图，是右侧的四辆汽车资源请求产生了回路现象，即死循环，导致了死锁。</p>
 <h1 id="死锁出现要素"><a href="#死锁出现要素" class="headerlink" title="死锁出现要素"></a>死锁出现要素</h1><ul>
 <li>两个或者两个以上事务</li>
@@ -207,9 +496,9 @@
 <li>事务之间因为持有锁和申请锁导致彼此循环等待</li>
 </ul>
 <h1 id="经典案例"><a href="#经典案例" class="headerlink" title="经典案例"></a>经典案例</h1><h2 id="案例一-事务并发-insert-唯一键冲突"><a href="#案例一-事务并发-insert-唯一键冲突" class="headerlink" title="案例一:事务并发 insert 唯一键冲突"></a>案例一:事务并发 insert 唯一键冲突</h2><p>表结构如下所示:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_1.png" alt="事务并发insert表结构"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_1.png" alt="事务并发insert表结构"></p>
 <p>测试用例如下:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_2.png" alt="事务并发insert测试用例"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_2.png" alt="事务并发insert测试用例"></p>
 <p>日志分析如下:</p>
 <ul>
 <li><p>事务 T2 insert into t7(id,a) values (26,10) 语句 insert 成功，持有 a=10 的 排他行锁( Xlocks rec but no gap )</p>
@@ -220,9 +509,9 @@
 </li>
 </ul>
 <h2 id="案例二-先-update-再-insert-的并发死锁问题"><a href="#案例二-先-update-再-insert-的并发死锁问题" class="headerlink" title="案例二:先 update 再 insert 的并发死锁问题"></a>案例二:先 update 再 insert 的并发死锁问题</h2><p>表结构如下，无数据:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_3.png" alt="先update再insert表结构"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_3.png" alt="先update再insert表结构"></p>
 <p>测试用例如下:</p>
-<p><img src="MySQL死锁原理及其解决方案研究/img_3.png" alt="先update再insert测试用例"></p>
+<p><img src="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/img_4.png" alt="先update再insert测试用例"></p>
 <p>死锁分析:<br>可以看到两个事务 update 不存在的记录，先后获得间隙锁( gap 锁)，gap 锁之间是兼容的所以在update环节不会阻塞。</p>
 <p>两者都持有 gap 锁，然后去竞争插入意向锁。当存在其他会话持有 gap 锁的时候，当前会话申请不了插入意向锁，导致死锁。</p>
 <h1 id="如何尽可能避免死锁"><a href="#如何尽可能避免死锁" class="headerlink" title="如何尽可能避免死锁"></a>如何尽可能避免死锁</h1><ul>
@@ -245,56 +534,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/" data-id="ckqvzbamh00000cs7064w9kpr" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/" data-id="ckqw3sjld0000sss7gmx96dyo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li></ul>
 
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2021/07/09/hello-world/" class="article-date">
-  <time datetime="2021-07-09T02:59:38.693Z" itemprop="datePublished">2021-07-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/09/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/hello-world/" data-id="ckqvzbamk00010cs79jez7m00" class="article-share-link">Share</a>
-      
-      
     </footer>
   </div>
   
@@ -315,7 +559,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
     </div>
   </div>
 
@@ -325,7 +569,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a>
+      <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 20px;">高并发</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 10px;">高并发系统</a>
     </div>
   </div>
 
@@ -347,15 +591,23 @@
       <ul>
         
           <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统02之高并发三大利器之降级</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/">高并发系统01之高并发三大利器之限流</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/">高并发系统00之如何设计一个高并发系统</a>
+          </li>
+        
+          <li>
             <a href="/2021/07/09/Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">Kafka为什么这么快</a>
-          </li>
-        
-          <li>
-            <a href="/2021/07/09/MySQL%E6%AD%BB%E9%94%81%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6/">MySQL死锁及其解决方案研究</a>
-          </li>
-        
-          <li>
-            <a href="/2021/07/09/hello-world/">Hello World</a>
           </li>
         
       </ul>

@@ -4,8 +4,8 @@
 
 # Site
 title: 沉默者
-subtitle: '学会了喋喋不休-习惯了沉默不语'
-description: '何鹏的个人学习总结'
+subtitle: 学会了喋喋不休-习惯了沉默不语
+description: 何鹏的个人学习总结
 keywords: 'Java,k8s,docker,linux,分布式,高并发'
 author: 'hepeng [smile.hepeng@qq.com]'
 language: zh-CN
@@ -102,7 +102,7 @@ tag_map:
 
 # Metadata elements
 ## https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta
-meta_generator: true
+meta_generator: false
 
 # Date / Time format
 ## Hexo uses Moment.js to parse and display date
