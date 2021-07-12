@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>分布式系统04之分布式锁 | 沉默者</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="什么是分布式锁 分布式模型下，数据只有一份，需要锁技术控制某一时刻修改数据的进程数。  不仅需要保证进程可见，还需要考虑进程与锁的网络问题  可以将标记存在内存，但是内存不是进程分配而是公共内存（redis、zk）,保证标记互斥。  Java分布式锁需求 同一个方法在同一时间只能被一台机器上一个线程执行。 可重入（避免死锁） 阻塞锁（业务需求）  公平锁（业务需求）  高可用、高性能获取&#x2F;释放锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式系统04之分布式锁">
+<meta property="og:url" content="http://example.com/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
+<meta property="og:site_name" content="沉默者">
+<meta property="og:description" content="什么是分布式锁 分布式模型下，数据只有一份，需要锁技术控制某一时刻修改数据的进程数。  不仅需要保证进程可见，还需要考虑进程与锁的网络问题  可以将标记存在内存，但是内存不是进程分配而是公共内存（redis、zk）,保证标记互斥。  Java分布式锁需求 同一个方法在同一时间只能被一台机器上一个线程执行。 可重入（避免死锁） 阻塞锁（业务需求）  公平锁（业务需求）  高可用、高性能获取&#x2F;释放锁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/img_1.png">
+<meta property="article:published_time" content="2021-07-09T10:35:00.000Z">
+<meta property="article:modified_time" content="2021-07-12T06:45:09.254Z">
+<meta property="article:author" content="hepeng [smile.hepeng@qq.com]">
+<meta property="article:tag" content="分布式系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/img_1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">沉默者</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-分布式系统04之分布式锁" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="article-date">
+  <time datetime="2021-07-09T10:35:00.000Z" itemprop="datePublished">2021-07-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      分布式系统04之分布式锁
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="什么是分布式锁"><a href="#什么是分布式锁" class="headerlink" title="什么是分布式锁"></a>什么是分布式锁</h2><ul>
+<li>分布式模型下，数据只有一份，需要锁技术控制某一时刻修改数据的进程数。 </li>
+<li>不仅需要保证进程可见，还需要考虑进程与锁的网络问题 </li>
+<li>可以将标记存在内存，但是内存不是进程分配而是公共内存（redis、zk）,保证标记互斥。</li>
+</ul>
+<h2 id="Java分布式锁需求"><a href="#Java分布式锁需求" class="headerlink" title="Java分布式锁需求"></a>Java分布式锁需求</h2><ul>
+<li>同一个方法在同一时间只能被一台机器上一个线程执行。</li>
+<li>可重入（避免死锁）</li>
+<li>阻塞锁（业务需求） </li>
+<li>公平锁（业务需求） </li>
+<li>高可用、高性能获取/释放锁</li>
+</ul>
+<h2 id="Java分布式锁解决方案"><a href="#Java分布式锁解决方案" class="headerlink" title="Java分布式锁解决方案"></a>Java分布式锁解决方案</h2><h3 id="基于数据库"><a href="#基于数据库" class="headerlink" title="基于数据库"></a>基于数据库</h3><p>基于表主键唯一做分布式锁</p>
+<h3 id="基于redis"><a href="#基于redis" class="headerlink" title="基于redis"></a>基于redis</h3><h4 id="基于-redis-的-SETNX-、EXPIRE-方法做分布式锁"><a href="#基于-redis-的-SETNX-、EXPIRE-方法做分布式锁" class="headerlink" title="基于 redis 的 SETNX()、EXPIRE() 方法做分布式锁"></a>基于 redis 的 SETNX()、EXPIRE() 方法做分布式锁</h4><p>使用步骤：</p>
+<ul>
+<li>setnx(lockkey, 1) 返回1，占位成功</li>
+<li>expire()对lockkey设置超时时间，避免死锁</li>
+<li>执行完业务后，delete命令删除key</li>
+</ul>
+<p>在 expire() 命令执行成功前，发生了宕机的现象，那么就依然会出现死锁的问题。</p>
+<h4 id="基于-redis-的-setnx-、get-和-getset-方法来实现分布式锁。"><a href="#基于-redis-的-setnx-、get-和-getset-方法来实现分布式锁。" class="headerlink" title="基于 redis 的 setnx()、get() 和 getset() 方法来实现分布式锁。"></a>基于 redis 的 setnx()、get() 和 getset() 方法来实现分布式锁。</h4><p>使用步骤</p>
+<ul>
+<li>setnx(lockkey, 当前时间+过期超时时间)，如果返回 1，则获取锁成功；如果返回 0 则没有获取到锁，转向 2。</li>
+<li>get(lockkey) 获取值 oldExpireTime ，并将这个 value 值与当前的系统时间进行比较，如果小于当前系统时间，则认为这个锁已经超时，可以允许别的请求重新获取，转向 3。</li>
+<li>计算 newExpireTime = 当前时间+过期超时时间，然后 getset(lockkey, newExpireTime) 会返回当前 lockkey 的值currentExpireTime。</li>
+<li>判断 currentExpireTime 与 oldExpireTime 是否相等，如果相等，说明当前 getset 设置成功，获取到了锁。如果不相等，说明这个锁又被别的请求获取走了，那么当前请求可以直接返回失败，或者继续重试。</li>
+<li>在获取到锁之后，当前线程可以开始自己的业务处理，当处理完毕后，比较自己的处理时间和对于锁设置的超时时间，如果小于锁设置的超时时间，则直接执行 delete 释放锁；如果大于锁设置的超时时间，则不需要再锁进行处理。</li>
+</ul>
+<h4 id="分布式锁Redlock"><a href="#分布式锁Redlock" class="headerlink" title="分布式锁Redlock"></a>分布式锁Redlock</h4><p>解决问题：<br>解决redis分布式锁的单点故障问题</p>
+<p>使用步骤：</p>
+<ul>
+<li>获取当前时间（毫秒数）。</li>
+<li>按顺序依次向N个Redis节点执行获取锁的操作。这个获取操作跟前面基于单Redis节点的获取锁的过程相同，包含随机字符串my_random_value，也包含过期时间(比如PX 30000，即锁的有效时间)。为了保证在某个Redis节点不可用的时候算法能够继续运行，这个获取锁的操作还有一个超时时间(time out)，它要远小于锁的有效时间（几十毫秒量级）。客户端在向某个Redis节点获取锁失败以后，应该立即尝试下一个Redis节点。这里的失败，应该包含任何类型的失败，比如该Redis节点不可用，或者该Redis节点上的锁已经被其它客户端持有（注：Redlock原文中这里只提到了Redis节点不可用的情况，但也应该包含其它的失败情况）。</li>
+<li>计算整个获取锁的过程总共消耗了多长时间，计算方法是用当前时间减去第1步记录的时间。如果客户端从大多数Redis节点（&gt;= N/2+1）成功获取到了锁，并且获取锁总共消耗的时间没有超过锁的有效时间(lock validity time)，那么这时客户端才认为最终获取锁成功；否则，认为最终获取锁失败。</li>
+<li>如果最终获取锁成功了，那么这个锁的有效时间应该重新计算，它等于最初的锁的有效时间减去第3步计算出来的获取锁消耗的时间。</li>
+<li>如果最终获取锁失败了（可能由于获取到锁的Redis节点个数少于N/2+1，或者整个获取锁的过程消耗的时间超过了锁的最初有效时间），那么客户端应该立即向所有Redis节点发起释放锁的操作（即前面介绍的Redis Lua脚本）。</li>
+</ul>
+<h4 id="基于-REDISSON-做分布式锁"><a href="#基于-REDISSON-做分布式锁" class="headerlink" title="基于 REDISSON 做分布式锁"></a>基于 REDISSON 做分布式锁</h4><p>redis 官方的分布式锁组件，解决超时时间设置不合理问题。每获得一个锁时，只设置一个很短的超时时间，同时起一个线程在每次快要到超时时间时去刷新锁的超时时间。在释放锁的同时结束这个线程。</p>
+<h3 id="zookeeper实现分布式锁"><a href="#zookeeper实现分布式锁" class="headerlink" title="zookeeper实现分布式锁"></a>zookeeper实现分布式锁</h3><p>其实基于ZooKeeper，就是使用它的临时有序节点来实现的分布式锁。</p>
+<p><img src="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/img_1.png" alt="img.png"><br>当某客户端要进行逻辑的加锁时，就在zookeeper上的某个指定节点的目录下，去生成一个唯一的临时有序节点， 然后判断自己是否是这些有序节点中序号最小的一个。</p>
+<ul>
+<li>如果是，则算是获取了锁。</li>
+<li>如果不是，则说明没有获取到锁，那么就需要在序列中找到比自己小的那个节点，并对其调用exist()方法，对其注册事件监听，当监听到这个节点被删除了，那就再去判断一次自己当初创建的节点是否变成了序列中最小的。<ul>
+<li>如果是，则获取锁，如果不是，则重复上述步骤。</li>
+</ul>
+</li>
+</ul>
+<p>当释放锁的时候，只需将这个临时节点删除即可。</p>
+<h2 id="redis分布式锁和zookeeper分布式锁的区别"><a href="#redis分布式锁和zookeeper分布式锁的区别" class="headerlink" title="redis分布式锁和zookeeper分布式锁的区别"></a>redis分布式锁和zookeeper分布式锁的区别</h2><h3 id="优缺点对比"><a href="#优缺点对比" class="headerlink" title="优缺点对比"></a>优缺点对比</h3><p>对于redis的分布式锁而言：</p>
+<ul>
+<li><p>它获取锁的方式简单粗暴，获取不到锁直接不断尝试获取锁，比较消耗性能。</p>
+</li>
+<li><p>redis的设计定位决定了它的数据并不是强一致性的，在某些极端情况下，可能会出现问题。锁的模型不够健壮</p>
+<ul>
+<li>即便使用redlock算法来实现，在某些复杂场景下，也无法保证其实现100%没有问题，关于redlock的讨论可以看How to do distributed locking</li>
+</ul>
+</li>
+</ul>
+<p>但是另一方面使用redis实现分布式锁在很多企业中非常常见，而且大部分情况下都不会遇到所谓的“极端复杂场景”</p>
+<p>所以使用redis作为分布式锁也不失为一种好的方案，最重要的一点是redis的性能很高，可以支撑高并发的获取、释放锁操作。</p>
+<p>对于zk分布式锁而言:</p>
+<ul>
+<li><p>zookeeper天生设计定位就是分布式协调，强一致性。锁的模型健壮、简单易用、适合做分布式锁。</p>
+</li>
+<li><p>如果获取不到锁，只需要添加一个监听器就可以了，不用一直轮询，性能消耗较小。</p>
+</li>
+</ul>
+<p>但是zk也有其缺点：如果有较多的客户端频繁的申请加锁、释放锁，对于zk集群的压力会比较大。</p>
+<h3 id="技术选型"><a href="#技术选型" class="headerlink" title="技术选型"></a>技术选型</h3><p>就个人而言的话，我<strong>比较推崇zk实现的锁</strong>：</p>
+<p>因为redis是有可能存在隐患的，可能会导致数据不对的情况。但是，怎么选用要看具体在公司的场景了。</p>
+<p>如果公司里面有zk集群条件，优先选用zk实现，但是如果说公司里面只有redis集群，没有条件搭建zk集群。</p>
+<p>那么其实用redis来实现也可以，另外还可能是系统设计者考虑到了系统已经有redis，但是又不希望再次引入一些外部依赖的情况下，可以选用redis。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" data-id="ckr0e5hxv000c28s74zjb7jy6" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" rel="tag">分布式系统</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">分布式系统03之分布式事务</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DB/" rel="tag">DB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" rel="tag">分布式系统</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DB/" style="font-size: 10px;">DB</a> <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" style="font-size: 20px;">分布式系统</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 15px;">高并发系统</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式系统04之分布式锁</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式系统03之分布式事务</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8FID%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">分布式系统02之分布式ID解决方案</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%90%86%E8%AE%BA/">分布式系统01之分布式系统理论</a>
+          </li>
+        
+          <li>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统00之什么是分布式系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2021 hepeng [smile.hepeng@qq.com]<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

@@ -7,20 +7,20 @@
   
   <title>高并发系统02之高并发三大利器之缓存 | 沉默者</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
+  <meta name="description" content="高并发三大利器  缓存  –  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  –  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  –  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
 <meta property="og:type" content="article">
 <meta property="og:title" content="高并发系统02之高并发三大利器之缓存">
 <meta property="og:url" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/index.html">
 <meta property="og:site_name" content="沉默者">
-<meta property="og:description" content="高并发三大利器  缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  —  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
+<meta property="og:description" content="高并发三大利器  缓存  –  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹 降级  –  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开 限流  –  通过对并发访问&#x2F;请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png">
+<meta property="og:image" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png">
 <meta property="article:published_time" content="2021-07-09T08:27:12.000Z">
-<meta property="article:modified_time" content="2021-07-09T09:08:48.067Z">
+<meta property="article:modified_time" content="2021-07-09T10:04:35.365Z">
 <meta property="article:author" content="hepeng [smile.hepeng@qq.com]">
 <meta property="article:tag" content="高并发系统">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png">
+<meta name="twitter:image" content="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png">
   
     <link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
   
@@ -93,9 +93,9 @@
       
         <p><strong>高并发三大利器</strong></p>
 <ul>
-<li>缓存  —  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
-<li>降级  —  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
-<li>限流  —  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
+<li>缓存  –  缓存目的是提升系统访问速度和增大系统能处理的容量，可谓是抗高并发流量的银弹</li>
+<li>降级  –  当服务出问题或者影响到核心流程的性能则需要暂时屏蔽掉，待高峰或者问题解决后再打开</li>
+<li>限流  –  通过对并发访问/请求进行限速或者一个时间窗口内的的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务（定向到错误页或告知资源没有了）、排队或等待（比如秒杀、评论、下单）、降级（返回兜底数据或默认数据，如商品详情页库存默认有货）、特权处理(优先处理需要高保障的用户群体)</li>
 </ul>
 <h2 id="缓存分类"><a href="#缓存分类" class="headerlink" title="缓存分类"></a>缓存分类</h2><ul>
 <li>分布式缓存： 如redis、memcached等</li>
@@ -113,8 +113,8 @@
 </li>
 </ul>
 <h2 id="本地缓存"><a href="#本地缓存" class="headerlink" title="本地缓存"></a>本地缓存</h2><p>常见本地缓存有以下几种实现方式：</p>
-<img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png" class>
-<p>其中性能最佳的是Caffeine，了解更详细信息参考： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIyMjQwMTgyNA==&amp;mid=2247483811&amp;idx=1&amp;sn=9d0b207044b5fe447169d630a7f77aab&amp;scene=21#wechat_redirect">本地缓存性能之王</a></p>
+<p><img src="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/img.png"></p>
+<p>其中性能最佳的是Caffeine，了解更详细信息参考： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIyMjQwMTgyNA==&mid=2247483811&idx=1&sn=9d0b207044b5fe447169d630a7f77aab&scene=21#wechat_redirect">本地缓存性能之王</a></p>
 <h2 id="分布式缓存"><a href="#分布式缓存" class="headerlink" title="分布式缓存"></a>分布式缓存</h2><p>分布式缓存详细信息参考redis系列文章</p>
 <h2 id="缓存更新方案"><a href="#缓存更新方案" class="headerlink" title="缓存更新方案"></a>缓存更新方案</h2><p>我们一般的缓存更新主要有以下几种更新策略：</p>
 <ul>
@@ -160,7 +160,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" data-id="ckqw4lmt7000b0ws70d6pd3is" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/" data-id="ckr0e5hy0000j28s7gb648bwz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
@@ -202,7 +202,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DB/" rel="tag">DB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DB/" rel="tag">DB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kafka/" rel="tag">Kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" rel="tag">分布式系统</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" rel="tag">高并发系统</a></li></ul>
     </div>
   </div>
 
@@ -212,7 +212,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/DB/" style="font-size: 10px;">DB</a> <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 20px;">高并发系统</a>
+      <a href="/tags/DB/" style="font-size: 10px;">DB</a> <a href="/tags/Kafka/" style="font-size: 10px;">Kafka</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" style="font-size: 20px;">分布式系统</a> <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/" style="font-size: 15px;">高并发系统</a>
     </div>
   </div>
 
@@ -234,23 +234,23 @@
       <ul>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%8D%E7%BA%A7/">高并发系统03之高并发三大利器之降级</a>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式系统04之分布式锁</a>
           </li>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E7%BC%93%E5%AD%98/">高并发系统02之高并发三大利器之缓存</a>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F03%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式系统03之分布式事务</a>
           </li>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%89%E5%A4%A7%E5%88%A9%E5%99%A8%E4%B9%8B%E9%99%90%E6%B5%81/">高并发系统01之高并发三大利器之限流</a>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F02%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8FID%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">分布式系统02之分布式ID解决方案</a>
           </li>
         
           <li>
-            <a href="/2021/07/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/">高并发系统00之如何设计一个高并发系统</a>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F01%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%90%86%E8%AE%BA/">分布式系统01之分布式系统理论</a>
           </li>
         
           <li>
-            <a href="/2021/07/09/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%9701%E4%B9%8BKafka%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB/">消息中间件Kafka系列01之Kafka为什么这么快</a>
+            <a href="/2021/07/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统00之什么是分布式系统</a>
           </li>
         
       </ul>
