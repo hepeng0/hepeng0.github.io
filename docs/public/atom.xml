@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>沉默者</title>
   
-  <subtitle>学会了喋喋不休-习惯了沉默不语</subtitle>
+  <subtitle>路漫漫其修远兮</subtitle>
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
@@ -10,7 +10,7 @@
   <id>http://example.com/</id>
   
   <author>
-    <name>hepeng [smile.hepeng@qq.com]</name>
+    <name>何鹏 [smile.hepeng@qq.com]</name>
     
   </author>
   
