@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    function webSocketConnect() {
+        //webSocket连接
+        //生成websocket对象
+        websocket = new SockJS('http://localhost/api/uss/v1/ats/endpointAts');
+        //获得满足websocket定义的对象
+        stompClient = Stomp.over(websocket);
+        // /topic/[tp]
+        //连接服务端 /user/[name]/topic/[tp]
+        stompClient.connect({"userId":1}, function (frame) {
+            //订阅
+            stompClient.subscribe("/user/topic/ats/original-data", function (response) {
+                var require = response.body;
+                console.log(require);
+            });
+			
+			stompClient.subscribe("/topic/ats/classtab-relation/111", function (response) {
+                var require = response.body;
+                console.log(require);
+            });
+			stompClient.subscribe("/topic/snapface/139", function (response) {
+                var require = response.body;
+                console.log(require);
+            });
+            window.stompClientW = stompClient;
+        });
+    }
+
+    webSocketConnect();
+</script>
+
+</html>
