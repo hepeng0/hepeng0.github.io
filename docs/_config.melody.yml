@@ -4,11 +4,11 @@
 # ---------------
 theme_color:
   enable: true # or false -> to use the default theme
-  main: "#000"
-  paginator: "#000"
-  button_hover: "#49B1F5"
-  text_selection: "#808080"
-  link_color: "#A25EA2"
+  main: "#49B1F5"
+  paginator: "#3366ff"
+  button_hover: "#3366ff"
+  text_selection: "#3399ff"
+  link_color: "#5CACEE"
   hr_color: "#000"
   meta_color: "#000"
   header_text_color: "#ffffff" # v1.7.0+
@@ -130,7 +130,7 @@ cdn:
 
 # Post info settings
 # ---------------
-avatar:
+avatar: https://hbimg.huabanimg.com/9662a766b2e14418b22ed6e8185913c3e7562ab455df-j8mU0R_fw658/format/webp
 
 top_img: false # false or url of img
 
@@ -143,16 +143,16 @@ post_meta:
 
 # Please see doc for more details: https://molunerfinn.com/hexo-theme-melody-doc/additional-package-support.html#word-counting
 wordcount:
-  enable: false
+  enable: true
 
 toc:
   enable: true
   # number: true
 
 post_copyright:
-  enable: true
-  license: CC BY-NC-SA 4.0
-  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+  enable: false
+#  license: CC BY-NC-SA 4.0
+#  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 # Please see doc for more details: https://molunerfinn.com/hexo-theme-melody-doc/theme-config.html#auto-excerpt
 auto_excerpt:
@@ -199,9 +199,9 @@ addThis:
   enable: false
   #pubid:
 
-# sharejs:
-# enable: false
-# disabled_sites:
+sharejs:
+  enable: false
+#  disabled_sites:
 
 # Comments System
 # ---------------
@@ -214,12 +214,12 @@ disqus:
   # enable: false
   # uid:
 
-  # gitment
-  # enable: false
-  # owner:
-  # repo:
-  # client_id:
-  # client_secret:
+gitment:
+ enable: true
+ owner: hepeng0
+ repo: https://github.com/hepeng0/hepeng0.github.io.git
+ client_id: 361f1f703199e5ecf15f
+ client_secret: a6a765a46f1462a2ecf3da7f512c94bab29eb1e4
 
   # gitalk:
   #   enable: false

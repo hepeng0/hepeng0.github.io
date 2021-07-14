@@ -4,43 +4,13 @@
 
 # Site
 title: 沉默者
-subtitle: 路漫漫其修远兮
-description: 学会了喋喋不休-习惯了沉默不语
+subtitle: 路漫漫其修远兮，吾将上下而求索
+description:
 keywords: ['Java','k8s','docker','linux','分布式','高并发']
 author: '何鹏 [smile.hepeng@qq.com]'
 language: zh-CN
 timezone: ''
 
-codeblock:
-  highlight_theme: night bright
-  copy_button:
-    enable: true
-    show_result: true
-    style: mac
-back2top:
-  enable: true
-  sidebar: true
-  scrollpecent: true
-reading_progress:
-  enable: true
-  position: top
-  color: "#222"
-  height: 2px
-bookmark:
-  enable: true
-  color: "#222"
-  save: auto
-github_banner:
-  enable: true
-  permalink: https://github.com/hepeng0/hepeng0.github.io.git
-  title: Hepeng Github
-pangu: true
-math:
-  enable: true
-  per_page: true
-  mathjax:
-    enable: true
-    mhchem: true
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: http://example.com
@@ -95,7 +65,7 @@ prismjs:
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
   path: ''
-  per_page: 10
+  per_page: 6
   order_by: -date
 
 # Category & Tag
