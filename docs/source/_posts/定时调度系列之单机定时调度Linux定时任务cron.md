@@ -1,7 +1,8 @@
 ---
 title: 定时调度系列之单机定时调度Linux定时任务cron
 date: 2021-07-14 09:07:05
-tags: 定时调度
+tags: ['定时调度']
+categories: JAVA开发
 ---
 
 实现linux定时任务有：cron、anacron、at,使用最多的是cron任务

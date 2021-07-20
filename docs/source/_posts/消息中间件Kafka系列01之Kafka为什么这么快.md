@@ -1,7 +1,8 @@
 ---
 title: 消息中间件Kafka系列01之Kafka为什么这么快
 date: 2021-07-09 14:12:42
-tags: Kafka
+tags: [ 'Kafka', '消息中间件', 'MQ' ]
+categories: 中间件
 ---
 
 * partition 并行处理

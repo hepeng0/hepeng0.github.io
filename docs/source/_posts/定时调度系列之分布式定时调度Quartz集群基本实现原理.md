@@ -1,7 +1,8 @@
 ---
 title: 定时调度系列之分布式定时调度Quartz集群基本实现原理
 date: 2021-07-14 09:11:09
-tags: 定时调度
+tags: ['定时调度', 'Quartz']
+categories: JAVA开发
 ---
 
 ### Quartz集群架构

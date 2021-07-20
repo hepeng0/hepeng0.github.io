@@ -1,7 +1,8 @@
 ---
 title: 定时调度系列之分布式定时调度Elastic-Job解析
 date: 2021-07-14 09:11:37
-tags: 定时调度
+tags: ['定时调度']
+categories: JAVA开发
 ---
 
 待完善，具体信息参考： 

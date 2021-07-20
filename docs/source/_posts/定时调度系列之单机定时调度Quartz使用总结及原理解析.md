@@ -1,7 +1,8 @@
 ---
 title: 定时调度系列之单机定时调度Quartz使用总结及原理解析
 date: 2021-07-14 09:08:59
-tags: 定时调度
+tags: ['定时调度', 'Quartz']
+categories: JAVA开发
 ---
 
 ## Quartz可以用来做什么？
@@ -128,7 +129,7 @@ import static org.quartz.CalendarIntervalScheduleBuilder.*;
 import static org.quartz.DateBuilder.*;
 ```
 DSL风格写起来会更加连贯，畅快，而且由于不是使用setter的风格，语义上会更容易理解一些。对比一下：
-```java
+```
 JobDetail jobDetail=new JobDetailImpl("jobDetail1","group1",HelloQuartz.class);
 jobDetail.getJobDataMap().put("name", "quartz");
 

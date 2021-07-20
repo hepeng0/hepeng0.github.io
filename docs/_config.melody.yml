@@ -130,7 +130,7 @@ cdn:
 
 # Post info settings
 # ---------------
-avatar: https://hbimg.huabanimg.com/9662a766b2e14418b22ed6e8185913c3e7562ab455df-j8mU0R_fw658/format/webp
+avatar: https://img2.baidu.com/it/u=928705063,3876627980&fm=26&fmt=auto&gp=0.jpg
 
 top_img: false # false or url of img
 
@@ -214,20 +214,20 @@ disqus:
   # enable: false
   # uid:
 
-gitment:
- enable: true
- owner: hepeng0
- repo: https://github.com/hepeng0/hepeng0.github.io.git
- client_id: 361f1f703199e5ecf15f
- client_secret: a6a765a46f1462a2ecf3da7f512c94bab29eb1e4
+#gitment:
+# enable: true
+# owner: hepeng0
+# repo: https://github.com/hepeng0/hepeng0.github.io.git
+# client_id: 361f1f703199e5ecf15f
+# client_secret: a6a765a46f1462a2ecf3da7f512c94bab29eb1e4
 
-  # gitalk:
-  #   enable: false
-  #   client_id:
-  #   client_secret:
-  #   repo:
-  #   owner:
-  #   admin:
+gitalk:
+  enable: true
+  client_id: 83850031ee87c27765eb
+  client_secret: 6c5e13a8b6670d5bfa85ba548ba3570cae29e671
+  repo: blob-comment
+  owner: hepeng0
+  admin: hepeng0
 
   # valine comment system. https://valine.js.org
   # valine:
