@@ -36,7 +36,7 @@ import java.util.List;
  * Created by 玄玉<https://jadyer.cn/> on 2018/6/5 10:00.
  */
 @Aspect
-@Configuration
+//@Configuration
 @ConditionalOnClass({RedissonClient.class})
 @ConfigurationProperties(prefix="redis")
 @Slf4j

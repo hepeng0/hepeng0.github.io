@@ -51,3 +51,4 @@ spring:
       config:
         server-addr: 10.113.75.165:9090
         namespace: 4804405f-f1b6-4534-8478-53aab1a18253
+        enabled: false
