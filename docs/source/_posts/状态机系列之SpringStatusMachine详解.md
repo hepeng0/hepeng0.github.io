@@ -50,7 +50,7 @@ Spring文档指出，在以下情况下，项目很适合使用状态机：
 
 ### Spring StatusMachine使用案例
 假设在一个业务系统中，有这样一个对象，它有三个状态：草稿、待发布、发布完成，针对这三个状态的业务动作也比较简单，分别是：上线、发布、回滚。该业务状态机如下图所示。
-![img.png](./状态机系列之SpringStatusMachine详解/img.png)
+![](./状态机系列之SpringStatusMachine详解/img.png)
 
 创建一个基础的Spring Boot工程，在主pom文件中加入Spring StateMachine的依赖：
 ```xml

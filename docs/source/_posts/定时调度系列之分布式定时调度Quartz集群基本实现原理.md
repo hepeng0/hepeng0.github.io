@@ -7,7 +7,7 @@ categories: JAVA开发
 
 ### Quartz集群架构
 一个Quartz集群中的每个节点是一个独立的Quartz应用，它又管理着其他的节点。这就意味着你必须对每个节点分别启动或停止。Quartz集群中，独立的Quartz节点并不与另一其的节点或是管理节点通信，而是通过相同的数据库表来感知到另一Quartz应用的，如图2.1所示。
-![img.png](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img.png)
+![](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img.png)
 
 ### Quartz集群相关数据库表
 因为Quartz集群依赖于数据库，所以必须首先创建Quartz数据库表，Quartz发布包中包括了所有被支持的数据库平台的SQL脚本。这些SQL脚本存放于<quartz_home>/docs/dbTables 目录下。
@@ -15,10 +15,10 @@ categories: JAVA开发
 这里采用的Quartz 1.8.4版本，总共12张表，不同版本，表个数可能不同。数据库为mysql，用tables_mysql.sql创建数据库表。
 
 Quartz 1.8.4在mysql数据库中生成的表：
-![img_1.png](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img_1.png)
+![](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img_1.png)
 
 Quartz数据表简介：
-![img_2.png](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img_2.png)
+![](./定时调度系列之分布式定时调度Quartz集群基本实现原理/img_2.png)
 
 ### Quartz Scheduler在集群中的启动流程
 Quartz Scheduler自身是察觉不到被集群的，只有配置给Scheduler的JDBC JobStore才知道。  
