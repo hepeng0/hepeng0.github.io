@@ -1,0 +1,293 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="分布式协调组件之Zookeeper基础概念入门"><meta name="keywords" content="ZOOKEEPER"><meta name="author" content="何鹏 [smile.hepeng@qq.com]"><meta name="copyright" content="何鹏 [smile.hepeng@qq.com]"><title>分布式协调组件之Zookeeper基础概念入门 | 沉默者</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.9.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.0"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css"><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  hexoVersion: '5.4.0'
+} </script><link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
+</head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="Toggle article">Toggle site</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">什么是分布式协调组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.1.</span> <span class="toc-text">常用的分布式协调组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.2.</span> <span class="toc-text">分布式协调组件应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6Zookeeper%E6%A6%82%E8%A7%88"><span class="toc-number">2.</span> <span class="toc-text">分布式协调组件Zookeeper概览</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E5%AE%9E%E7%8E%B0%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">2.1.</span> <span class="toc-text">ZooKeeper 实现了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E7%89%B9%E7%82%B9"><span class="toc-number">2.2.</span> <span class="toc-text">ZooKeeper 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E5%85%B8%E5%9E%8B%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">2.3.</span> <span class="toc-text">ZooKeeper 典型应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Zookeeper%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5"><span class="toc-number">3.</span> <span class="toc-text">Zookeeper重要概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Data-model%EF%BC%88%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">Data model（数据模型）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#znode%EF%BC%88%E6%95%B0%E6%8D%AE%E8%8A%82%E7%82%B9%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">znode（数据节点）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#znode%E8%8A%82%E7%82%B9%E5%88%86%E7%B1%BB"><span class="toc-number">3.2.1.</span> <span class="toc-text">znode节点分类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#znode-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">3.2.2.</span> <span class="toc-text">znode 数据结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC"><span class="toc-number">3.3.</span> <span class="toc-text">版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ACL%EF%BC%88%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">ACL（权限控制）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Watcher"><span class="toc-number">3.5.</span> <span class="toc-text">Watcher</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%9A%E8%AF%9D%EF%BC%88Session%EF%BC%89"><span class="toc-number">3.6.</span> <span class="toc-text">会话（Session）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZooKeeper-%E9%9B%86%E7%BE%A4"><span class="toc-number">4.</span> <span class="toc-text">ZooKeeper 集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E9%9B%86%E7%BE%A4%E8%A7%92%E8%89%B2"><span class="toc-number">4.1.</span> <span class="toc-text">ZooKeeper 集群角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zookeeper-Leader%E9%80%89%E4%B8%BE"><span class="toc-number">4.2.</span> <span class="toc-text">Zookeeper Leader选举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E9%9B%86%E7%BE%A4%E4%B8%AD%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%8A%B6%E6%80%81"><span class="toc-number">4.3.</span> <span class="toc-text">ZooKeeper 集群中的服务器状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper-%E9%9B%86%E7%BE%A4%E4%B8%BA%E5%95%A5%E6%9C%80%E5%A5%BD%E5%A5%87%E6%95%B0%E5%8F%B0"><span class="toc-number">4.4.</span> <span class="toc-text">ZooKeeper 集群为啥最好奇数台</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZAB-%E5%8D%8F%E8%AE%AE%E5%92%8CPaxos-%E7%AE%97%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">ZAB 协议和Paxos 算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB-%E5%8D%8F%E8%AE%AE%E4%BB%8B%E7%BB%8D"><span class="toc-number">5.1.</span> <span class="toc-text">ZAB 协议介绍</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Zookeeper%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">Zookeeper总结</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://img2.baidu.com/it/u=928705063,3876627980&amp;fm=26&amp;fmt=auto&amp;gp=0.jpg"></div><div class="author-info__name text-center">何鹏 [smile.hepeng@qq.com]</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">Articles</span><span class="pull-right">29</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">Tags</span><span class="pull-right">26</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">Categories</span><span class="pull-right">5</span></a></div></div></div><div id="content-outer"><div class="plain" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">沉默者</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> Search</span></a></span></div></div><div class="layout" id="content-inner"><article id="post"><div class="plain" id="post-title">分布式协调组件之Zookeeper基础概念入门</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-02-04</time><span class="post-meta__separator">|</span><i class="fa fa-inbox" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"> 中间件</a><span class="post-meta__separator">|</span><span class="post-meta-wordcount"><span>Word count: </span><span class="word-count">4.5k</span><span class="post-meta__separator">|</span><span>Reading time: 13 min</span></span></div><div class="article-container" id="post-content"><h2 id="什么是分布式协调组件"><a href="#什么是分布式协调组件" class="headerlink" title="什么是分布式协调组件"></a>什么是分布式协调组件</h2><p>讲Zookeeper之前，首先我们了解下什么是”分布式协调组件“。</p>
+<p>所谓的“分布式协调组件”，就是我们在分布式应用开发中，为了协调分布式系统中各个机器协同运行而使用到的“公共组件”。比如Zookeeper、Redis等，都可以看作是“分布式协调组件”。</p>
+<p>这里很容易可以看到，分布式环境中的“分布式协调组件”，和单机环境中的“多线程协调组件”（比如Java多线程并发工具包），其实是类似的东西。</p>
+<p>不同的是: </p>
+<ul>
+<li>多线程协调组件是在同一台机器的内存中；而分布式协调组件的调用则是需要通过网络通信的，“网络不可达”的不确定性，就加大了使用分布式协调组件的使用难度</li>
+<li>可用性：多线程协调组件是单机应用中的一部分，完全不需要担心某个并发变量会“挂掉”；而分布式协调组件一般是独立运行的，如何保障分布式协调组件的高可用，是一个很复杂的命题。比如一般会通过集群保障高可用，而集群里的机器之间如何保障数据一致性，则又是一个更加复杂的命题</li>
+<li>分布式协调组件还需要考虑性能问题、可扩展性等</li>
+</ul>
+<h3 id="常用的分布式协调组件"><a href="#常用的分布式协调组件" class="headerlink" title="常用的分布式协调组件"></a>常用的分布式协调组件</h3><p><strong>全局功能数据存储/有功能的组件</strong>：</p>
+<ul>
+<li>K-V类：redis、memcache</li>
+<li>Zookeeper</li>
+<li>消息队列</li>
+<li>配置中心：Spring Cloud Config等</li>
+</ul>
+<p><strong>持久数据存储</strong>：</p>
+<ul>
+<li>MySQL</li>
+<li>MongoDB</li>
+</ul>
+<h3 id="分布式协调组件应用场景"><a href="#分布式协调组件应用场景" class="headerlink" title="分布式协调组件应用场景"></a>分布式协调组件应用场景</h3><ul>
+<li>分布式session</li>
+<li>分布式计数器</li>
+<li>分布式锁</li>
+<li>分布式队列：<ul>
+<li>先入先出队列</li>
+<li>要等所有队列元素聚集之后才能统一安排执行的Barrier模型队列</li>
+</ul>
+</li>
+<li>分布式配置</li>
+<li>分布式协调 / 通知</li>
+<li>数据发布、订阅</li>
+<li>软负载均衡：域名 -&gt; IP和端口号配置</li>
+<li>命名服务：在分布式环境中，上层应用需要一个全局唯一的名字，类似于数据库中的主键</li>
+<li>集群管理：<ul>
+<li>集群监控（进群运行时状态收集）</li>
+<li>集群控制（对集群进行操作和控制）</li>
+</ul>
+</li>
+<li>Master选举</li>
+</ul>
+<h2 id="分布式协调组件Zookeeper概览"><a href="#分布式协调组件Zookeeper概览" class="headerlink" title="分布式协调组件Zookeeper概览"></a>分布式协调组件Zookeeper概览</h2><h3 id="ZooKeeper-实现了什么"><a href="#ZooKeeper-实现了什么" class="headerlink" title="ZooKeeper 实现了什么"></a>ZooKeeper 实现了什么</h3><p>ZooKeeper 是一个开源的分布式协调服务，它的设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。</p>
+<p><strong>原语</strong>： 操作系统或计算机网络用语范畴。是由若干条指令组成的，用于完成一定功能的一个过程。具有不可分割性·即原语的执行必须是连续的，在执行过程中不允许被中断。</p>
+<p>ZooKeeper为我们提供了高可用、高性能、稳定的分布式数据一致性解决方案，通常被用于实现诸如<strong>数据发布/订阅、负载均衡、命名服务、分布式协调/通知、集群管理、Master选举、分布式锁和分布式队列</strong>等功能。</p>
+<p>另外，ZooKeeper 将<strong>数据保存在内存</strong>中，性能是非常棒的。</p>
+<ul>
+<li>在“读”多于“写”的应用程序中尤其地高性能，因为“写”会导致所有的服务器间同步状态。</li>
+</ul>
+<p><code>“读”多于“写”是协调服务的典型场景</code></p>
+<h3 id="ZooKeeper-特点"><a href="#ZooKeeper-特点" class="headerlink" title="ZooKeeper 特点"></a>ZooKeeper 特点</h3><ul>
+<li><p><strong>顺序一致性</strong>： 从同一客户端发起的事务请求，最终将会严格地按照顺序被应用到 ZooKeeper 中去。</p>
+</li>
+<li><p><strong>原子性</strong>： 所有事务请求的处理结果在整个集群中所有机器上的应用情况是一致的，也就是说，要么整个集群中所有的机器都成功应用了某一个事务，要么都没有应用。</p>
+</li>
+<li><p><strong>单一系统映像</strong>： 无论客户端连到哪一个 ZooKeeper 服务器上，其看到的服务端数据模型都是一致的。</p>
+</li>
+<li><p><strong>可靠性</strong>： 一旦一次更改请求被应用，更改的结果就会被持久化，直到被下一次更改覆盖。</p>
+</li>
+</ul>
+<h3 id="ZooKeeper-典型应用场景"><a href="#ZooKeeper-典型应用场景" class="headerlink" title="ZooKeeper 典型应用场景"></a>ZooKeeper 典型应用场景</h3><ul>
+<li><p><strong>分布式锁</strong>： 通过创建唯一节点获得分布式锁，当获得锁的一方执行完相关代码或者是挂掉之后就释放锁。</p>
+</li>
+<li><p><strong>命名服务</strong>： 可以通过 ZooKeeper 的顺序节点生成全局唯一 ID</p>
+</li>
+<li><p><strong>数据发布/订阅</strong>：通过 Watcher 机制可以很方便地实现数据发布/订阅。当你将数据发布到 ZooKeeper 被监听的节点上，其他机器可通过监听 ZooKeeper 上节点的变化来实现配置的动态更新。</p>
+</li>
+</ul>
+<h2 id="Zookeeper重要概念"><a href="#Zookeeper重要概念" class="headerlink" title="Zookeeper重要概念"></a>Zookeeper重要概念</h2><h3 id="Data-model（数据模型）"><a href="#Data-model（数据模型）" class="headerlink" title="Data model（数据模型）"></a>Data model（数据模型）</h3><p>ZooKeeper 数据模型采用层次化的多叉树形结构，每个节点上都可以存储数据，这些数据可以是数字、字符串或者是二级制序列。并且。每个节点还可以拥有 N 个子节点，最上层是根节点以“/”来代表。每个数据节点在 ZooKeeper 中被称为 znode，它是 ZooKeeper 中数据的最小单元。并且，每个 znode 都一个唯一的路径标识。</p>
+<p>强调一句：ZooKeeper 主要是用来协调服务的，而不是用来存储业务数据的，所以<strong>不要放比较大的数据在znode上</strong>，ZooKeeper 给出的上限是每个结点的数据大小最大是 1M。</p>
+<p>ZooKeeper 节点路径标识方式和 Unix 文件系统路径非常相似，都是由一系列使用斜杠”/“进行分割的路径表示，开发员可以向这个节点中写人数据，也可以在节点下面创建子节点。</p>
+<p><img src="/2021/02/04/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E4%B9%8BZookeeper%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%85%A5%E9%97%A8/b26842dad2872eb0498fdf2bb1471cee.jpeg#pic_center"></p>
+<h3 id="znode（数据节点）"><a href="#znode（数据节点）" class="headerlink" title="znode（数据节点）"></a>znode（数据节点）</h3><h4 id="znode节点分类"><a href="#znode节点分类" class="headerlink" title="znode节点分类"></a>znode节点分类</h4><ul>
+<li><p>持久（PERSISTENT）节点： 一旦创建就一直存在即使 ZooKeeper 集群宕机，直到将其删除。</p>
+</li>
+<li><p>临时（EPHEMERAL）节点： 临时节点的生命周期是与客户端会话（session）绑定的，会话消失则节点消失。并且，临时节点只能做叶子节点，不能创建子节点。</p>
+</li>
+<li><p>持久顺序（PERSISTENT_SEQUENTIAL）节点：除了具有持久（PERSISTENT）节点的特性之外， 子节点的名称还具有顺序性。比如/node1/app0000000001 、/node1/app0000000002 。</p>
+</li>
+<li><p>临时顺序（EPHEMERAL_SEQUENTIAL）节点：除了具备临时（EPHEMERAL）节点的特性之外，子节点的名称还具有顺序性。</p>
+</li>
+</ul>
+<h4 id="znode-数据结构"><a href="#znode-数据结构" class="headerlink" title="znode 数据结构"></a>znode 数据结构</h4><p>每个 znode 由 2 部分组成:</p>
+<ul>
+<li>stat ：状态信息</li>
+<li>data ： 节点存放的数据的具体内容</li>
+</ul>
+<p>Stat 类中包含了一个数据节点的所有状态信息的字段，包括事务 ID-cZxid、节点创建时间-ctime 和子节点个数-numChildren 等等，详细信息参考下表。</p>
+<table>
+<thead>
+<tr>
+<th>znode 状态信息</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cZxid</td>
+<td>create ZXID，即该数据节点被创建时的事务 id</td>
+</tr>
+<tr>
+<td>ctime</td>
+<td>create time，即该节点的创建时间</td>
+</tr>
+<tr>
+<td>mZxid</td>
+<td>modified ZXID，即该节点最终一次更新时的事务 id</td>
+</tr>
+<tr>
+<td>mtime</td>
+<td>modified time，即该节点最后一次的更新时间</td>
+</tr>
+<tr>
+<td>pZxid</td>
+<td>该节点的子节点列表最后一次修改时的事务 id，只有子节点列表变更才会更新 pZxid，子节点内容变更不会更新</td>
+</tr>
+<tr>
+<td>cversion</td>
+<td>子节点版本号，当前节点的子节点每次变化时值增加 1</td>
+</tr>
+<tr>
+<td>dataVersion</td>
+<td>数据节点内容版本号，节点创建时为 0，每更新一次节点内容(不管内容有无变化)该版本号的值增加 1</td>
+</tr>
+<tr>
+<td>aclVersion</td>
+<td>节点的 ACL 版本号，表示该节点 ACL 信息变更次数</td>
+</tr>
+<tr>
+<td>ephemeralOwner</td>
+<td>创建该临时节点的会话的 sessionId；如果当前节点为持久节点，则 ephemeralOwner=0</td>
+</tr>
+<tr>
+<td>dataLength</td>
+<td>数据节点内容长度</td>
+</tr>
+<tr>
+<td>numChildren</td>
+<td>当前节点的子节点个数</td>
+</tr>
+</tbody></table>
+<h3 id="版本"><a href="#版本" class="headerlink" title="版本"></a>版本</h3><p>前面我们已经提到，对应于每个 znode，ZooKeeper 都会为其维护一个叫作 <strong>Stat</strong>的数据结构，Stat 中记录了这个 znode 的三个相关的版本：</p>
+<ul>
+<li><p>  <strong>dataVersion</strong> ：当前 znode 节点的版本号</p>
+</li>
+<li><p>  <strong>cversion</strong> ： 当前 znode 子节点的版本</p>
+</li>
+<li><p>  <strong>aclVersion</strong> ： 当前 znode 的 ACL 的版本。</p>
+</li>
+</ul>
+<h3 id="ACL（权限控制）"><a href="#ACL（权限控制）" class="headerlink" title="ACL（权限控制）"></a><strong>ACL（权限控制）</strong></h3><p>ZooKeeper 采用 ACL（AccessControlLists）策略来进行权限控制，类似于 UNIX 文件系统的权限控制。</p>
+<p>对于 znode 操作的权限，ZooKeeper 提供了以下 5 种：</p>
+<ul>
+<li><p>  <strong>CREATE</strong> : 能创建子节点</p>
+</li>
+<li><p>  <strong>READ</strong> ：能获取节点数据和列出其子节点</p>
+</li>
+<li><p>  <strong>WRITE</strong> : 能设置/更新节点数据</p>
+</li>
+<li><p>  <strong>DELETE</strong> : 能删除子节点</p>
+</li>
+<li><p>  <strong>ADMIN</strong> : 能设置节点 ACL 的权限</p>
+</li>
+</ul>
+<p>其中尤其需要注意的是，<strong>CREATE</strong>和<strong>DELETE</strong>这两种权限都是针对<strong>子节点</strong>的权限控制。</p>
+<p>对于身份认证，提供了以下几种方式：</p>
+<ul>
+<li><p>  <strong>world</strong> ： 默认方式，所有用户都可无条件访问。</p>
+</li>
+<li><p>  <strong>auth</strong>: 不使用任何 id，代表任何已认证的用户。</p>
+</li>
+<li><p>  <strong>digest</strong>: 用户名:密码认证方式： <em>username:password</em> 。</p>
+</li>
+<li><p>  <strong>ip</strong>: 对指定 ip 进行限制。</p>
+</li>
+</ul>
+<h3 id="Watcher"><a href="#Watcher" class="headerlink" title="Watcher"></a><strong>Watcher</strong></h3><p>Watcher（事件监听器），是 ZooKeeper 中的一个很重要的特性。ZooKeeper允许用户在指定节点上注册一些 Watcher，并且在一些特定事件触发的时候，ZooKeeper服务端会将事件通知到感兴趣的客户端上去，该机制是 ZooKeeper实现分布式协调服务的重要特性。</p>
+<p><img src="/2021/02/04/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E4%B9%8BZookeeper%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%85%A5%E9%97%A8/be40875cd45d92900b44c4d39dedcb57.jpeg"></p>
+<p><em>用到 ZooKeeper 基本离不开 Watcher（事件监听器）机制。</em></p>
+<h3 id="会话（Session）"><a href="#会话（Session）" class="headerlink" title="会话（Session）"></a><strong>会话（Session）</strong></h3><p>Session 可以看作是 ZooKeeper 服务器与客户端的之间的一个 TCP 长连接，通过这个连接，客户端能够通过心跳检测与服务器保持有效的会话，也能够向 ZooKeeper 服务器发送请求并接受响应，同时还能够通过该连接接收来自服务器的 Watcher 事件通知。</p>
+<p>Session 有一个属性叫做：sessionTimeout ，sessionTimeout代表会话的超时时间。当由于服务器压力太大、网络故障或是客户端主动断开连接等各种原因导致客户端连接断开时，只要在sessionTimeout规定的时间内能够重新连接上集群中任意一台服务器，那么之前创建的会话仍然有效。</p>
+<p>另外，在为客户端创建会话之前，服务端首先会为每个客户端都分配一个 sessionID。由于 sessionID是 ZooKeeper 会话的一个重要标识，许多与会话相关的运行机制都是基于这个 sessionID 的，因此，无论是哪台服务器为客户端分配的 sessionID，都务必保证全局唯一。</p>
+<h2 id="ZooKeeper-集群"><a href="#ZooKeeper-集群" class="headerlink" title="ZooKeeper 集群"></a>ZooKeeper 集群</h2><p>为了保证高可用，最好是以集群形态来部署 ZooKeeper，这样只要集群中大部分机器是可用的（能够容忍一定的机器故障），那么 ZooKeeper 本身仍然是可用的，通常 3 台服务器就可以构成一个 ZooKeeper 集群了。</p>
+<p><img src="/2021/02/04/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E4%B9%8BZookeeper%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%85%A5%E9%97%A8/8de274eb6351bdf85a64e4ce1a4b9f65.png"></p>
+<p>上图中每一个 Server 代表一个安装 ZooKeeper 服务的服务器。组成 ZooKeeper 服务的服务器都会在内存中维护当前的服务器状态，并且每台服务器之间都互相保持着通信。集群间通过 ZAB 协议（ZooKeeper Atomic Broadcast）来保持数据的一致性。</p>
+<p><strong>最典型集群模式： Master/Slave 模式（主备模式）</strong>。</p>
+<p>在这种模式中，通常 Master 服务器作为主服务器提供写服务，其他的 Slave 服务器从服务器通过异步复制的方式获取 Master 服务器最新的数据提供读服务。</p>
+<h3 id="ZooKeeper-集群角色"><a href="#ZooKeeper-集群角色" class="headerlink" title="ZooKeeper 集群角色"></a>ZooKeeper 集群角色</h3><table>
+<thead>
+<tr>
+<th><strong>角色</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Leader</td>
+<td>为客户端提供读和写的服务，负责投票的发起和决议，更新系统状态。</td>
+</tr>
+<tr>
+<td>Follower</td>
+<td>为客户端提供读服务，如果是写服务则转发给 Leader。在选举过程中参与投票。</td>
+</tr>
+<tr>
+<td>Observer</td>
+<td>为客户端提供读服务器，如果是写服务则转发给 Leader。不参与选举过程中的投票，也不参与“过半写成功”策略。在不影响写性能的情况下提升集群的读性能。此角色于 ZooKeeper3.3 系列新增的角色。</td>
+</tr>
+</tbody></table>
+<h3 id="Zookeeper-Leader选举"><a href="#Zookeeper-Leader选举" class="headerlink" title="Zookeeper Leader选举"></a>Zookeeper Leader选举</h3><p>当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，就会进入 Leader 选举过程，这个过程会选举产生新的 Leader 服务器。</p>
+<p>这个过程大致是这样的：</p>
+<ol>
+<li><p> <strong>Leader election（选举阶段）</strong>: 节点在一开始都处于选举阶段，只要有一个节点得到超半数节点的票数，它就可以当选准 leader。</p>
+</li>
+<li><p> <strong>Discovery（发现阶段）</strong>: 在这个阶段，followers 跟准 leader 进行通信，同步 followers 最近接收的事务提议。</p>
+</li>
+<li><p> <strong>Synchronization（同步阶段）</strong>: 同步阶段主要是利用 leader 前一阶段获得的最新提议历史，同步集群中所有的副本。同步完成之后 准 leader 才会成为真正的 leader。</p>
+</li>
+<li><p> <strong>Broadcast（广播阶段）</strong>: 到了这个阶段，ZooKeeper 集群才能正式对外提供事务服务，并且 leader 可以进行消息广播。同时如果有新的节点加入，还需要对新节点进行同步。</p>
+</li>
+</ol>
+<h3 id="ZooKeeper-集群中的服务器状态"><a href="#ZooKeeper-集群中的服务器状态" class="headerlink" title="ZooKeeper 集群中的服务器状态"></a><strong>ZooKeeper 集群中的服务器状态</strong></h3><ul>
+<li><p>  <strong>LOOKING</strong>: 寻找 Leader。</p>
+</li>
+<li><p>  <strong>LEADING</strong>: Leader 状态，对应的节点为 Leader。</p>
+</li>
+<li><p>  <strong>FOLLOWING</strong>: Follower 状态，对应的节点为 Follower。</p>
+</li>
+<li><p>  <strong>OBSERVING</strong>: Observer 状态，对应节点为 Observer，该节点不参与 Leader 选举。</p>
+</li>
+</ul>
+<h3 id="ZooKeeper-集群为啥最好奇数台"><a href="#ZooKeeper-集群为啥最好奇数台" class="headerlink" title="ZooKeeper 集群为啥最好奇数台"></a><strong>ZooKeeper 集群为啥最好奇数台</strong></h3><p>ZooKeeper 集群在宕掉几个 ZooKeeper 服务器之后，如果剩下的 ZooKeeper 服务器个数大于宕掉的个数的话整个 ZooKeeper 才依然可用。假如我们的集群中有 n 台 ZooKeeper 服务器，那么也就是剩下的服务数必须大于 n/2。先说一下结论，2n 和 2n-1 的容忍度是一样的，都是n-1，大家可以先自己仔细想一想，这应该是一个很简单的数学问题了。 比如假如我们有 3 台，那么最大允许宕掉 1 台 ZooKeeper 服务器，如果我们有 4 台的的时候也同样只允许宕掉 1 台。 假如我们有 5 台，那么最大允许宕掉 2 台ZooKeeper 服务器，如果我们有 6 台的的时候也同样只允许宕掉 2 台。</p>
+<h2 id="ZAB-协议和Paxos-算法"><a href="#ZAB-协议和Paxos-算法" class="headerlink" title="ZAB 协议和Paxos 算法"></a>ZAB 协议和Paxos 算法</h2><p>Paxos 算法应该可以说是 ZooKeeper 的灵魂了。但是，ZooKeeper 并没有完全采用Paxos算法 ，而是使用 ZAB 协议作为其保证数据一致性的核心算法。另外，在ZooKeeper的官方文档中也指出，ZAB协议并不像Paxos算法那样，是一种通用的分布式一致性算法，它是一种特别为Zookeeper设计的崩溃可恢复的原子消息广播算法。</p>
+<h3 id="ZAB-协议介绍"><a href="#ZAB-协议介绍" class="headerlink" title="ZAB 协议介绍"></a><strong>ZAB 协议介绍</strong></h3><p>ZAB（ZooKeeper Atomic Broadcast 原子广播） 协议是为分布式协调服务 ZooKeeper 专门设计的一种支持崩溃恢复的原子广播协议。 在 ZooKeeper 中，主要依赖 ZAB 协议来实现分布式数据一致性，基于该协议，ZooKeeper 实现了一种主备模式的系统架构来保持集群中各个副本之间的数据一致性。</p>
+<p><strong>ZAB 协议两种基本的模式：崩溃恢复和消息广播</strong></p>
+<p>ZAB 协议包括两种基本的模式，分别是</p>
+<ul>
+<li><p><strong>崩溃恢复</strong>：当整个服务框架在启动过程中，或是当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，ZAB 协议就会进入恢复模式并选举产生新的Leader服务器。当选举产生了新的 Leader 服务器，同时集群中已经有过半的机器与该Leader服务器完成了状态同步之后，ZAB协议就会退出恢复模式。<br>  其中，<strong>所谓的状态同步是指数据同步，用来保证集群中存在过半的机器能够和Leader服务器的数据状态保持一致</strong>。</p>
+</li>
+<li><p><strong>消息广播</strong>：<strong>当集群中已经有过半的Follower服务器完成了和Leader服务器的状态同步，那么整个服务框架就可以进入消息广播模式了。</strong><br>  当一台同样遵守ZAB协议的服务器启动后加入到集群中时，如果此时集群中已经存在一个Leader服务器在负责进行消息广播，那么新加入的服务器就会自觉地进入数据恢复模式：找到Leader所在的服务器，并与其进行数据同步，然后一起参与到消息广播流程中去。</p>
+</li>
+</ul>
+<p>具体ZAB协议介绍可参考 <a target="_blank" rel="noopener" href="https://dbaplus.cn/news-141-1875-1.html">实例详解ZooKeeper ZAB协议、分布式锁与领导选举</a></p>
+<h2 id="Zookeeper总结"><a href="#Zookeeper总结" class="headerlink" title="Zookeeper总结"></a>Zookeeper总结</h2><ol>
+<li><p>ZooKeeper 本身就是一个分布式程序（只要半数以上节点存活，ZooKeeper 就能正常服务）。</p>
+</li>
+<li><p>为了保证高可用，最好是以集群形态来部署ZooKeeper，这样只要集群中大部分机器是可用的（能够容忍一定的机器故障），那么ZooKeeper 本身仍然是可用的。</p>
+</li>
+<li><p>ZooKeeper 将数据保存在内存中，这也就保证了高吞吐量和低延迟</p>
+</li>
+</ol>
+<ul>
+<li>但是内存限制了能够存储的容量不太大，此限制也是保持 znode 中存储的数据量较小的进一步原因。</li>
+</ul>
+<ol start="4">
+<li><p>ZooKeeper 是高性能的。<br>在“读”多于“写”的应用程序中尤其地明显，因为“写”会导致所有的服务器间同步状态。（“读”多于“写”是协调服务的典型场景。）</p>
+</li>
+<li><p>ZooKeeper 有临时节点的概念。  </p>
+</li>
+</ol>
+<ul>
+<li>当创建临时节点的客户端会话一直保持活动，瞬时节点就一直存在。而当会话终结时，瞬时节点被删除。  </li>
+<li>持久节点是指一旦这个 znode 被创建了，除非主动进行 znode 的移除操作，否则这个 znode 将一直保存在 ZooKeeper 上。</li>
+</ul>
+<ol start="6">
+<li>ZooKeeper 底层其实只提供了两个功能：</li>
+</ol>
+<ul>
+<li>管理（存储、读取）用户程序提交的数据；</li>
+<li>为用户程序提供数据节点监听服务。</li>
+</ul>
+</div></article><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ZOOKEEPER/">ZOOKEEPER</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2021/04/26/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0%E4%B9%8BHikariCP%E5%AE%9E%E7%8E%B0%E8%AF%A6%E8%A7%A3/"><i class="fa fa-chevron-left">  </i><span>数据库连接池之HikariCP实现详解</span></a></div><div class="next-post pull-right"><a href="/2020/10/11/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F00%E4%B9%8B%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/"><span>高并发系统00之如何设计一个高并发系统</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
+  clientID: '83850031ee87c27765eb',
+  clientSecret: '6c5e13a8b6670d5bfa85ba548ba3570cae29e671',
+  repo: 'blob-comment',
+  owner: 'hepeng0',
+  admin: 'hepeng0',
+  id: md5(decodeURI(location.pathname)),
+  language: 'zh-CN'
+})
+gitalk.render('gitalk-container')</script></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2018 - 2021 By 何鹏 [smile.hepeng@qq.com]</div><div class="framework-info"><span>Driven - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>Theme - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.9.0"></script><script src="/js/fancybox.js?version=1.9.0"></script><script src="/js/sidebar.js?version=1.9.0"></script><script src="/js/copy.js?version=1.9.0"></script><script src="/js/fireworks.js?version=1.9.0"></script><script src="/js/transition.js?version=1.9.0"></script><script src="/js/scroll.js?version=1.9.0"></script><script src="/js/head.js?version=1.9.0"></script><script src="/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">Local search</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>Powered by</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

@@ -1,6 +1,6 @@
 ---
 title: 状态机系列之SpringStatusMachine详解
-date: 2021-07-15 09:48:09
+date: 2020-07-15 09:48:09
 tags: [状态机, Spring生态]
 categories: JAVA开发
 ---

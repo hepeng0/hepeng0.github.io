@@ -1,6 +1,6 @@
 ---
 title: 批处理框架之SpringBatch快速入门实践  
-date: 2021-07-19 16:47:31  
+date: 2021-06-19 16:47:31  
 tags: [SpringBatch, Spring生态, 批处理]  
 categories: JAVA开发
 ---
