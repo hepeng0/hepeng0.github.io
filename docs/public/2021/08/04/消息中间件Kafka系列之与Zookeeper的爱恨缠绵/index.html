@@ -9,23 +9,22 @@
   },
   hexoVersion: '5.4.0'
 } </script><link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
-</head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="Toggle article">Toggle site</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81Zookeeper"><span class="toc-number">1.</span> <span class="toc-text">Kafka为什么需要Zookeeper</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zookeeper%E4%B8%BAKafka%E6%8F%90%E4%BE%9B%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">Zookeeper为Kafka提供了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Kafka%E8%A6%81%E6%8A%9B%E5%BC%83Zookeeper"><span class="toc-number">3.</span> <span class="toc-text">为什么Kafka要抛弃Zookeeper</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%96%E9%83%A8%E4%BE%9D%E8%B5%96%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%8F%8A%E7%B3%BB%E7%BB%9F%E6%95%88%E7%8E%87%E5%BD%B1%E5%93%8D"><span class="toc-number">3.1.</span> <span class="toc-text">外部依赖带来的复杂度及系统效率影响</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Zookeeper%E7%9A%84%E8%87%B4%E5%91%BD%E7%BC%BA%E9%99%B7"><span class="toc-number">3.2.</span> <span class="toc-text">Zookeeper的致命缺陷</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E4%BC%98%E9%9B%85%E6%80%A7"><span class="toc-number">3.3.</span> <span class="toc-text">设计优雅性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%A2%86%E5%9F%9F%E6%8A%80%E6%9C%AF%E5%AE%8C%E5%96%84"><span class="toc-number">3.4.</span> <span class="toc-text">分布式领域技术完善</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kafka%E5%8E%BB%E6%8E%89Zookeeper%E5%90%8E%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E5%85%B6%E5%8A%9F%E8%83%BD"><span class="toc-number">4.</span> <span class="toc-text">Kafka去掉Zookeeper后怎么实现其功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://img2.baidu.com/it/u=928705063,3876627980&amp;fm=26&amp;fmt=auto&amp;gp=0.jpg"></div><div class="author-info__name text-center">何鹏 [smile.hepeng@qq.com]</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">Articles</span><span class="pull-right">29</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">Tags</span><span class="pull-right">26</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">Categories</span><span class="pull-right">5</span></a></div></div></div><div id="content-outer"><div class="plain" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">沉默者</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> Search</span></a></span></div></div><div class="layout" id="content-inner"><article id="post"><div class="plain" id="post-title">消息中间件Kafka系列之与Zookeeper的爱恨缠绵</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-08-04</time><span class="post-meta__separator">|</span><i class="fa fa-inbox" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"> 中间件</a><span class="post-meta__separator">|</span><span class="post-meta-wordcount"><span>Word count: </span><span class="word-count">2.8k</span><span class="post-meta__separator">|</span><span>Reading time: 8 min</span></span></div><div class="article-container" id="post-content"><p>在 <a href="/2021/02/04/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E4%B9%8BZookeeper%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%85%A5%E9%97%A8/" title="分布式协调组件之Zookeeper基础概念入门">分布式协调组件之Zookeeper基础概念入门</a> 一文中，我们简单介绍了Zookeeper的基础概念。</p>
+</head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="Toggle article">Toggle site</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81Zookeeper"><span class="toc-number">1.</span> <span class="toc-text">Kafka为什么需要Zookeeper</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zookeeper%E4%B8%BAKafka%E6%8F%90%E4%BE%9B%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">Zookeeper为Kafka提供了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Kafka%E8%A6%81%E6%8A%9B%E5%BC%83Zookeeper"><span class="toc-number">3.</span> <span class="toc-text">为什么Kafka要抛弃Zookeeper</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%96%E9%83%A8%E4%BE%9D%E8%B5%96%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%8F%8A%E7%B3%BB%E7%BB%9F%E6%95%88%E7%8E%87%E5%BD%B1%E5%93%8D"><span class="toc-number">3.1.</span> <span class="toc-text">外部依赖带来的复杂度及系统效率影响</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Zookeeper%E7%9A%84%E8%87%B4%E5%91%BD%E7%BC%BA%E9%99%B7"><span class="toc-number">3.2.</span> <span class="toc-text">Zookeeper的致命缺陷</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E4%BC%98%E9%9B%85%E6%80%A7"><span class="toc-number">3.3.</span> <span class="toc-text">设计优雅性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%A2%86%E5%9F%9F%E6%8A%80%E6%9C%AF%E5%AE%8C%E5%96%84"><span class="toc-number">3.4.</span> <span class="toc-text">分布式领域技术完善</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kafka%E5%8E%BB%E6%8E%89Zookeeper%E5%90%8E%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E5%85%B6%E5%8A%9F%E8%83%BD"><span class="toc-number">4.</span> <span class="toc-text">Kafka去掉Zookeeper后怎么实现其功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://img2.baidu.com/it/u=928705063,3876627980&amp;fm=26&amp;fmt=auto&amp;gp=0.jpg"></div><div class="author-info__name text-center">何鹏 [smile.hepeng@qq.com]</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">Articles</span><span class="pull-right">32</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">Tags</span><span class="pull-right">29</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">Categories</span><span class="pull-right">6</span></a></div></div></div><div id="content-outer"><div class="plain" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">沉默者</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> Search</span></a></span></div></div><div class="layout" id="content-inner"><article id="post"><div class="plain" id="post-title">消息中间件Kafka系列之与Zookeeper的爱恨缠绵</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-08-04</time><span class="post-meta__separator">|</span><i class="fa fa-inbox" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"> 中间件</a><span class="post-meta__separator">|</span><span class="post-meta-wordcount"><span>Word count: </span><span class="word-count">2.8k</span><span class="post-meta__separator">|</span><span>Reading time: 8 min</span></span></div><div class="article-container" id="post-content"><p>在 <a href="/2021/02/04/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E7%BB%84%E4%BB%B6%E4%B9%8BZookeeper%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%85%A5%E9%97%A8/" title="分布式协调组件之Zookeeper基础概念入门">分布式协调组件之Zookeeper基础概念入门</a> 一文中，我们简单介绍了Zookeeper的基础概念。</p>
 <p>而Kafka作为Zookeeper分布式协调的重要案例，本文将通过Kafka与Zookeeper的合与分展示Kafka与Zookeeper的前世今生。</p>
 <h3 id="Kafka为什么需要Zookeeper"><a href="#Kafka为什么需要Zookeeper" class="headerlink" title="Kafka为什么需要Zookeeper"></a>Kafka为什么需要Zookeeper</h3><p>Kafka中存在众多的Leader选举，熟悉Kafka的朋友应该知道，一个主题可以拥有多个分区(数据分片)，每一个数据分片可以配置多个副本，如何保证一个分区的数据在多个副本之间的一致性成为一个迫切的需求。</p>
 <p>Kafka的实现套路就是一个分区的多个副本，从中选举出一个Leader用来承担客户端的读写请求，从节点从主节点处拷贝内容，Leader节点根据数据在副本中成功写入情况，进行抉择来确定是否写入成功。</p>
 <p>Kafka中topic的分区分布示意图：</p>
-<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_1.png"></p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_1.png" alt></p>
 <p>故此处需要进行Leader选举,而基于Zookeeper能轻松实现，从此一拍即合，开启了一段“蜜月之旅”。</p>
 <h3 id="Zookeeper为Kafka提供了什么"><a href="#Zookeeper为Kafka提供了什么" class="headerlink" title="Zookeeper为Kafka提供了什么"></a>Zookeeper为Kafka提供了什么</h3><p>ZooKeeper 作为给分布式系统提供协调服务的工具被 kafka 所依赖。</p>
 <p>在分布式系统中，消费者需要知道有哪些生产者是可用的，而如果每次消费者都需要和生产者建立连接并测试是否成功连接，那效率也太低了，显然是不可取的。</p>
-<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_5.png"></p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_5.png" alt></p>
 <p>通过使用 ZooKeeper 协调服务，Kafka 就能将 Producer，Consumer，Broker 等结合在一起，同时借助 ZooKeeper，Kafka 就能够将所有组件在无状态的条件下建立起生产者和消费者的订阅关系，实现负载均衡。</p>
-<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img.png"></p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img.png" alt></p>
 <ol>
 <li><p>注册中心</p>
 <ul>
-<li><p>Broker 信息注册</p>
-<ul>
+<li>Broker 信息注册<ul>
 <li>在 ZooKeeper 上会有一个专门用来进行 Broker 服务器列表记录的节点，节点路径为 /brokers/ids。  </li>
 <li>Kafka 的每个 Broker 启动时，都会在 ZooKeeper 中注册，创建 /brokers/ids/[0-N] 节点，写入 IP，端口等信息，每个 Broker 都有一个 BrokerId。  </li>
 <li>Broker 创建的是临时节点，在连接断开时节点就会自动删除，所以在 ZooKeeper 上就可以通过 Broker 中节点的变化来得到 Broker 的可用性。</li>
@@ -33,14 +32,10 @@
 </li>
 <li><p>Topic 信息注册</p>
 <ul>
-<li><p>在 Kafka 中可以定义很多个 Topic，每个 Topic 又被分为很多个 Partition。一般情况下，每个 Partition 独立在存在一个 Broker 上，所有的这些 Topic 和 Broker 的对应关系都由 ZooKeeper 进行维护。</p>
-</li>
-<li><p>Zookeeper会为topic分配一个单独节点，每个topic都会以/brokers/topics/[topic_name]的形式记录在Zookeeper。</p>
-</li>
-<li><p>一个topic的消息会被保存到多个partition，这些partition跟broker的对应关系也需要保存到Zookeeper。</p>
-</li>
-<li><p>partition是多副本保存的，上图中红色partition是leader副本。当leader副本所在的broker发生故障时，partition需要重新选举leader，这个需要由Zookeeper主导完成。</p>
-</li>
+<li>在 Kafka 中可以定义很多个 Topic，每个 Topic 又被分为很多个 Partition。一般情况下，每个 Partition 独立在存在一个 Broker 上，所有的这些 Topic 和 Broker 的对应关系都由 ZooKeeper 进行维护。</li>
+<li>Zookeeper会为topic分配一个单独节点，每个topic都会以/brokers/topics/[topic_name]的形式记录在Zookeeper。</li>
+<li>一个topic的消息会被保存到多个partition，这些partition跟broker的对应关系也需要保存到Zookeeper。</li>
+<li>partition是多副本保存的，上图中红色partition是leader副本。当leader副本所在的broker发生故障时，partition需要重新选举leader，这个需要由Zookeeper主导完成。</li>
 <li><p>broker启动后，会把自己的Broker ID注册到到对应topic节点的分区列表中。</p>
 <p>我们查看一个topic是xxx，分区编号是1的信息，命令如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master] get /brokers/topics/xxx/partitions/1/state</span><br><span class="line">&#123;&quot;controller_epoch&quot;:15,&quot;leader&quot;:11,&quot;version&quot;:1,&quot;leader_epoch&quot;:2,&quot;isr&quot;:[11,12,13]&#125;</span><br></pre></td></tr></table></figure>
@@ -50,7 +45,7 @@
 </li>
 <li><p>consumer 信息注册</p>
 <p>   消费者组也会向Zookeeper进行注册，Zookeeper会为其分配节点来保存相关数据，节点路径为/consumers/{group_id}，有3个子节点，如下图:</p>
-<p>   <img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_6.png"></p>
+<p>   <img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_6.png" alt></p>
 <p>   这样Zookeeper可以记录分区跟消费者的关系，以及分区的offset。</p>
 </li>
 </ul>
@@ -75,20 +70,19 @@
 </li>
 <li>监听topic相关的变化</li>
 <li>监听broker相关的变化</li>
-<li>集群元数据管理</li>
-</ul>
-<p> 下面这张图展示了Controller、Zookeeper和broker的交互细节：<br> <img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_7.png"></p>
-<p> Controller选举成功后，会从Zookeeper集群中拉取一份完整的元数据初始化ControllerContext，这些元数据缓存在Controller节点。当集群发生变化时，比如增加topic分区，Controller不仅需要变更本地的缓存数据，还需要将这些变更信息同步到其他Broker。</p>
-<p> Controller监听到Zookeeper事件、定时任务事件和其他事件后，将这些事件按照先后顺序暂存到LinkedBlockingQueue中，由事件处理线程按顺序处理，这些处理多数需要跟Zookeeper交互，Controller则需要更新自己的元数据。</p>
-<p> Kafka 的 Controller 选举就依靠 ZooKeeper 来完成，成功竞选为 Controller 的 Broker 会在 ZooKeeper 中创建 /controller 这个临时节点，在 ZooKeeper 中使用 get 命令查看节点内容：</p>
-<p> <img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_2.png" alt="img_2.png"></p>
-<ul>
-<li>“version”在目前版本中固定为1</li>
+<li><p>集群元数据管理</p>
+<p>下面这张图展示了Controller、Zookeeper和broker的交互细节：<br><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_7.png" alt></p>
+<p>Controller选举成功后，会从Zookeeper集群中拉取一份完整的元数据初始化ControllerContext，这些元数据缓存在Controller节点。当集群发生变化时，比如增加topic分区，Controller不仅需要变更本地的缓存数据，还需要将这些变更信息同步到其他Broker。</p>
+<p>Controller监听到Zookeeper事件、定时任务事件和其他事件后，将这些事件按照先后顺序暂存到LinkedBlockingQueue中，由事件处理线程按顺序处理，这些处理多数需要跟Zookeeper交互，Controller则需要更新自己的元数据。</p>
+<p>Kafka 的 Controller 选举就依靠 ZooKeeper 来完成，成功竞选为 Controller 的 Broker 会在 ZooKeeper 中创建 /controller 这个临时节点，在 ZooKeeper 中使用 get 命令查看节点内容：</p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_2.png" alt></p>
+</li>
+<li><p>“version”在目前版本中固定为1</p>
+</li>
 <li>“brokerid”表示 Broker 的编号</li>
-<li>“timestamp”表示竞选称为 Controller 时的时间戳。</li>
-</ul>
-<p> Kafka Controller选举流程: 当 Broker 启动时，会尝试读取 /controller 中的“brokerid”: </p>
-<ul>
+<li><p>“timestamp”表示竞选称为 Controller 时的时间戳。</p>
+<p>Kafka Controller选举流程: 当 Broker 启动时，会尝试读取 /controller 中的“brokerid”: </p>
+</li>
 <li>如果读取到的值不是-1，则表示已经有节点竞选成为 Controller 了，当前节点就会放弃竞选；</li>
 <li>而如果读取到的值为-1，ZooKeeper 就会尝试创建 /controller 节点，当该 Broker 去创建的时候，可能还有其他 Broker 一起同时创建节点，但只有一个 Broker 能够创建成功，即成为唯一的 Controller。</li>
 </ul>
@@ -99,7 +93,7 @@
 <p>除了复杂度，外部存储也会<strong>降低系统效率</strong>。</p>
 <p>例如 Kafka 集群每次启动的时候，Controller 必须从 ZooKeeper 加载集群的状态信息。</p>
 <p>再比如选举出一个新的 Controller 之后也会比较麻烦，Kafaka依赖一个单一Controller节点跟Zookeeper进行交互，如果这个Controller节点发生了故障，就需要从broker中选择新的Controller。如下图,新的Controller变成了broker3。</p>
-<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_4.png"></p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_4.png" alt></p>
 <p>新的Controller选举成功后，会重新从Zookeeper拉取元数据进行初始化，并且需要通知其他所有的broker更新ActiveControllerId。老的Controller需要关闭监听、事件处理线程和定时任务。分区数非常多时，这个过程非常耗时，而且这个过程中Kafka集群是不能工作的。</p>
 <p>当分区数增加时，Zookeeper保存的元数据变多，Zookeeper集群压力变大，达到一定级别后，监听延迟增加，给Kafaka的工作带来了影响。</p>
 <p>所以，Kafka单集群承载的<strong>分区数量是一个瓶颈</strong>。而这又恰恰是一些业务场景需要的。</p>
@@ -112,15 +106,14 @@
 <p>Raft协议的两个重要组成部分：Leader选举、日志复制，而日志复制为多个副本提供数据强一致性提供了强一致性，并且一个显著的特点是Raft节点是去中心化的架构，不依赖外部的组件，而是作为一个协议簇嵌入到应用中的，即与应用本身是融合为一体的。</p>
 <h3 id="Kafka去掉Zookeeper后怎么实现其功能"><a href="#Kafka去掉Zookeeper后怎么实现其功能" class="headerlink" title="Kafka去掉Zookeeper后怎么实现其功能"></a>Kafka去掉Zookeeper后怎么实现其功能</h3><p>KIP-500用Quorum Controller代替之前的Controller，Quorum中每个Controller节点都会保存所有元数据，通过KRaft协议保证副本的一致性。这样即使Quorum Controller节点出故障了，新的Controller迁移也会非常快。</p>
 <p>以Kafka Topic的分布图举例，引用Raft协议的示例图如下：</p>
-<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_3.png"></p>
+<p><img src="/2021/08/04/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6Kafka%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%8EZookeeper%E7%9A%84%E7%88%B1%E6%81%A8%E7%BC%A0%E7%BB%B5/img_3.png" alt></p>
 <p>官方介绍，升级之后，Kafka可以轻松支持百万级别的分区。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Kafak团队把通过Raft协议同步数据的方式Kafka Raft Metadata mode,简称KRaft</span><br></pre></td></tr></table></figure>
-
 <p>关于Raft协议，本文并不打算深入进行探讨，具体参考文章<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/91288179">Raft协议原理详解</a></p>
 <p>Raft协议为选主提供了另外一种可行方案，而且还无需依赖第三方组件，何乐而不为呢？故最终Kafka在2.8版本中正式废弃了Zookeeper，拥抱Raft。</p>
 <p>Kafaka计划在3.0版本会兼容Zookeeper Controller和Quorum Controller，这样用户可以进行灰度测试。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在大规模集群和云原生的背景下，使用Zookeeper给Kafka的运维和集群性能造成了很大的压力。去除Zookeeper是必然趋势，这也符合大道至简的架构思想。</p>
-</div></article><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kafka/">Kafka</a><a class="post-meta__tags" href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件</a><a class="post-meta__tags" href="/tags/MQ/">MQ</a><a class="post-meta__tags" href="/tags/ZOOKEEPER/">ZOOKEEPER</a></div><nav id="pagination"><div class="next-post pull-right"><a href="/2021/08/02/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%B3%BB%E5%88%97%E4%B9%8B%E6%AD%BB%E4%BF%A1%E3%80%81%E5%BB%B6%E8%BF%9F%E3%80%81%E9%87%8D%E8%AF%95%E9%98%9F%E5%88%97/"><span>消息中间件系列之死信、延迟、重试队列</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
+</div></article><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kafka/">Kafka</a><a class="post-meta__tags" href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件</a><a class="post-meta__tags" href="/tags/MQ/">MQ</a><a class="post-meta__tags" href="/tags/ZOOKEEPER/">ZOOKEEPER</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2021/08/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%88%A9%E5%99%A8%E4%B9%8BAlibaba-Sentinel%E5%88%9D%E6%8E%A2/"><i class="fa fa-chevron-left">  </i><span>高并发利器之Alibaba Sentinel初探</span></a></div><div class="next-post pull-right"><a href="/2021/08/02/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%B3%BB%E5%88%97%E4%B9%8B%E6%AD%BB%E4%BF%A1%E3%80%81%E5%BB%B6%E8%BF%9F%E3%80%81%E9%87%8D%E8%AF%95%E9%98%9F%E5%88%97/"><span>消息中间件系列之死信、延迟、重试队列</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
   clientID: '83850031ee87c27765eb',
   clientSecret: '6c5e13a8b6670d5bfa85ba548ba3570cae29e671',
   repo: 'blob-comment',

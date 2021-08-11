@@ -90,7 +90,7 @@ ZooKeeper 作为给分布式系统提供协调服务的工具被 kafka 所依赖
 
     Kafka 的 Controller 选举就依靠 ZooKeeper 来完成，成功竞选为 Controller 的 Broker 会在 ZooKeeper 中创建 /controller 这个临时节点，在 ZooKeeper 中使用 get 命令查看节点内容：
 
-    ![img_2.png](./消息中间件Kafka系列之与Zookeeper的爱恨缠绵/img_2.png)
+    ![](./消息中间件Kafka系列之与Zookeeper的爱恨缠绵/img_2.png)
 
     * “version”在目前版本中固定为1
     * “brokerid”表示 Broker 的编号
