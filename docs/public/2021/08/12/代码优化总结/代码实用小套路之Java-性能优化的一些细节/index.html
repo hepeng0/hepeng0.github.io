@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="代码实用小套路之Java 性能优化的一些细节"><meta name="keywords" content="代码规范"><meta name="author" content="何鹏 [smile.hepeng@qq.com]"><meta name="copyright" content="何鹏 [smile.hepeng@qq.com]"><title>代码实用小套路之Java 性能优化的一些细节 | 沉默者</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.9.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.0"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css"><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  hexoVersion: '5.4.0'
+} </script><link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
+</head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="Toggle article">Toggle site</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://img2.baidu.com/it/u=928705063,3876627980&amp;fm=26&amp;fmt=auto&amp;gp=0.jpg"></div><div class="author-info__name text-center">何鹏 [smile.hepeng@qq.com]</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">Articles</span><span class="pull-right">34</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">Tags</span><span class="pull-right">29</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">Categories</span><span class="pull-right">6</span></a></div></div></div><div id="content-outer"><div class="plain" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">沉默者</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> Search</span></a></span></div></div><div class="layout" id="content-inner"><article id="post"><div class="plain" id="post-title">代码实用小套路之Java 性能优化的一些细节</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-08-12</time><span class="post-meta__separator">|</span><i class="fa fa-inbox" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/"> 代码规范</a><span class="post-meta__separator">|</span><span class="post-meta-wordcount"><span>Word count: </span><span class="word-count">3.4k</span><span class="post-meta__separator">|</span><span>Reading time: 10 min</span></span></div><div class="article-container" id="post-content"><p>在JAVA程序中，性能问题的大部分原因并不在于JAVA语言，而是程序本身。养成良好的编码习惯非常重要，能够显著地提升程序性能。</p>
+<ol>
+<li><p>尽量在合适的场合使用单例</p>
+<p> 使用单例可以减轻加载的负担，缩短加载的时间，提高加载的效率，但并不是所有地方都适用于单例</p>
+<p> 简单来说，单例主要适用于以下三个方面：</p>
+<ul>
+<li>控制资源的使用，通过线程同步来控制资源的并发访问；</li>
+<li>控制实例的产生，以达到节约资源的目的；</li>
+<li>控制数据共享，在不建立直接关联的条件下，让多个不相关的进程或线程之间实现通信。</li>
+</ul>
+</li>
+<li><p>尽量避免随意使用静态变量</p>
+<p> 当某个对象被定义为static变量所引用，那么GC通常是不会回收这个对象所占有的内存，如:</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> B b = <span class="keyword">new</span> B();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时静态变量 b 的生命周期与A类同步，如果A类不会卸载，那么b对象会常驻内存，直到程序终止。</p>
+</li>
+<li><p>尽量避免过多过常地创建Java对象</p>
+<p>尽量避免在经常调用的方法，循环中new对象，由于系统不仅要花费时间来创建对象，而且还要花时间对这些对象进行垃圾回收和处理。</p>
+<p>在我们可以控制的范围内，最大限度地重用对象，最好能用基本的数据类型或数组来替代对象。</p>
+</li>
+<li><p>尽量使用final修饰符</p>
+<p>带有final修饰符的类是不可派生的。在JAVA核心API中，有许多应用final的例子，例如java、lang、String，为String类指定final防止了使用者覆盖length()方法。</p>
+<p>另外，如果一个类是final的，则该类所有方法都是final的。java编译器会寻找机会内联（inline）所有的final方法（这和具体的编译器实现有关），此举能够使性能平均提高50%。</p>
+<p>如：让访问实例内变量的getter/setter方法变成”final：简单的getter/setter方法应该被置成final，这会告诉编译器，这个方法不会被重载，所以，可以变成”inlined”,例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MAF</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSize</span> <span class="params">(<span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">     _size = size;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">int</span> _size;</span><br><span class="line">&#125;</span><br><span class="line">   </span><br><span class="line"><span class="comment">// 更正</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DAF_fixed</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">final</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSize</span> <span class="params">(<span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">     _size = size;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">int</span> _size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>尽量使用局部变量</p>
+<p>调用方法时传递的参数以及在调用中创建的临时变量都保存在栈（Stack）中，速度较快；其他变量，如静态变量、实例变量等，都在堆（Heap）中创建，速度较慢。</p>
+</li>
+<li><p>尽量处理好包装类型和基本类型两者的使用场所</p>
+<p>虽然包装类型和基本类型在使用过程中是可以相互转换，但它们两者所产生的内存区域是完全不同的</p>
+<ul>
+<li><p>基本类型数据产生和处理都在栈中处理，包装类型作为对象是在堆中产生实例（开启逃逸分析小对象也在栈上分配?）。</p>
+</li>
+<li><p>在集合类对象，有对象方面需要的处理适用包装类型，其他的处理提倡使用基本类型。</p>
+</li>
+</ul>
+</li>
+<li><p>慎用synchronized，尽量减小synchronize的方法</p>
+<p>都知道，实现同步是要很大的系统开销作为代价的，甚至可能造成死锁，所以尽量避免无谓的同步控制。</p>
+<p>synchronize方法被调用时，直接会把当前对象锁了，在方法执行完之前其他线程无法调用当前对象的其他方法。</p>
+<p>所以，synchronize的方法尽量减小，并且应<strong>尽量使用方法同步代替代码块同步</strong>。</p>
+</li>
+<li><p>尽量不要使用finalize方法</p>
+<p>实际上，将资源清理放在finalize方法中完成是非常不好的选择</p>
+<p>由于GC的工作量很大，尤其是回收Young代内存时，大都会引起应用程序暂停，所以再选择使用finalize方法进行资源清理，会导致GC负担更大，程序运行效率更差。</p>
+</li>
+<li><p>尽量使用基本数据类型代替对象</p>
+<p>String str = “hello”;</p>
+<p>上面这种方式会创建一个“hello”字符串，而且JVM的字符缓存池还会缓存这个字符串；</p>
+<p>String str = new String(“hello”);</p>
+<p>此时程序除创建字符串外，str所引用的String对象底层还包含一个char[]数组，这个char[]数组依次存放了h,e,l,l,o</p>
+</li>
+<li><p>多线程在未发生线程安全前提下应尽量使用HashMap、ArrayList</p>
+<p>HashTable、Vector等使用了同步机制，降低了性能。</p>
+</li>
+<li><p>尽量合理的创建HashMap</p>
+<p>当你要创建一个比较大的hashMap时，充分利用这个构造函数</p>
+<p>public HashMap(int initialCapacity, float loadFactor);</p>
+<p>避免HashMap多次进行了hash重构,扩容是一件很耗费性能的事</p>
+<p>在默认中initialCapacity只有16，而loadFactor是 0.75，需要多大的容量，你最好能准确的估计你所需要的最佳大小，同样的Hashtable，Vectors也是一样的道理。</p>
+</li>
+<li><p>尽量减少对变量的重复计算</p>
+<p>如：</p>
+<p><code>for(int i=0;i&lt;list.size();i++)</code></p>
+<p>应该改为：<br><code>for(int i=0,len=list.size();i&lt;len;i++)</code></p>
+<p>并且在循环中应该避免使用复杂的表达式，在循环中，循环条件会被反复计算，如果不使用复杂表达式，而使循环条件值不变的话，程序将会运行的更快。</p>
+</li>
+<li><p>尽量避免不必要的创建</p>
+<p>如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">A a = new A();</span><br><span class="line">if(i==1)&#123;</span><br><span class="line">   list.add(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>应该改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if(i==1)&#123;</span><br><span class="line">   A a = new A();</span><br><span class="line">   list.add(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>尽量在finally块中释放资源</p>
+<p>程序中使用到的资源应当被释放，以避免资源泄漏，这最好在finally块中去做。不管程序执行的结果如何，finally块总是会执行的，以确保资源的正确关闭。</p>
+</li>
+<li><p>尽量使用移位来代替’a/b’或者’a*b’的操作</p>
+<p>“/“和”*”是一个代价很高的操作，使用移位的操作将会更快和更有效</p>
+<p>如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int num = a / 4;</span><br><span class="line">int num = a / 8;</span><br><span class="line">int num = a * 4;</span><br><span class="line">int num = a * 8;</span><br></pre></td></tr></table></figure>
+<p>应该改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int num = a &gt;&gt; 2;</span><br><span class="line">int num = a &gt;&gt; 3;</span><br><span class="line">int num = a &lt;&lt; 2;</span><br><span class="line">int num = a &lt;&lt; 3;</span><br></pre></td></tr></table></figure>
+<p>但注意的是<strong>使用移位应添加注释</strong>，因为移位操作不直观，比较难理解。</p>
+</li>
+<li><p>尽量确定StringBuffer的容量</p>
+<p>StringBuffer 的构造器会创建一个默认大小（通常是16）的字符数组。</p>
+<p>在使用中，如果超出这个大小，就会重新分配内存，创建一个更大的数组，并将原先的数组复制过来，再丢弃旧的数组。</p>
+<p>在大多数情况下，你可以在创建 StringBuffer的时候指定大小，这样就避免了在容量不够的时候自动增长，以提高性能。如：</p>
+<p>StringBuffer buffer = new StringBuffer(1000);</p>
+</li>
+<li><p>尽量早释放无用对象的引用</p>
+<p>大部分时，方法局部引用变量所引用的对象会随着方法结束而变成垃圾，因此，大部分时候程序无需将局部，引用变量显式设为null。例如：</p>
+<p>Java代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Public void test()&#123;</span><br><span class="line">   Object obj = new Object();</span><br><span class="line">   ……</span><br><span class="line">   Obj = null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这个就没必要了，随着方法test()的执行完成，程序中obj引用变量的作用域就结束了。</p>
+<p>但是如果是改成下面：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Public void test()&#123;</span><br><span class="line">   Object obj = new Object();</span><br><span class="line">   ……</span><br><span class="line">   Obj = null;</span><br><span class="line">   //执行耗时，耗内存操作；或调用耗时，耗内存的方法</span><br><span class="line">   ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时候就有必要将obj赋值为null，可以尽早的释放对Object对象的引用。</p>
+</li>
+<li><p>尽量避免使用二维数组</p>
+<p>二维数据占用的内存空间比一维数组多得多，大概10倍以上。</p>
+</li>
+<li><p>尽量避免使用split</p>
+<p>除非是必须的，否则应该避免使用split，split由于支持正则表达式，所以效率比较低</p>
+<p>如果是频繁的几十，几百万的调用将会耗费大量资源，如果确实需要频繁的调用split，可以考虑使用apache的StringUtils.split(string,char)，频繁split的可以缓存结果</p>
+</li>
+<li><p>ArrayList &amp; LinkedList</p>
+<p>一个是线性表，一个是链表，一句话，随机查询尽量使用ArrayList，ArrayList优于LinkedList，LinkedList还要移动指针，添加删除的操作LinkedList优于ArrayList，ArrayList还要移动数据</p>
+<p>不过这是理论性分析，事实未必如此，重要的是理解好2者得数据结构，对症下药。</p>
+</li>
+<li><p>尽量使用System.arraycopy ()代替通过来循环复制数组</p>
+<p>System.arraycopy() 要比通过循环来复制数组快的多。</p>
+</li>
+<li><p>尽量缓存经常使用的对象</p>
+<p>尽可能将经常使用的对象进行缓存，可以使用数组，或HashMap的容器来进行缓存，但这种方式可能导致系统占用过多的缓存，性能下降</p>
+<p>推荐可以使用一些第三方的开源工具，如EhCache，Oscache进行缓存，他们基本都实现了FIFO/FLU等缓存算法。</p>
+</li>
+<li><p>尽量避免非常大的内存分配</p>
+<p>有时候问题不是由当时的堆状态造成的，而是因为分配失败造成的。分配的内存块都必须是连续的，而随着堆越来越满，找到较大的连续块越来越困难。</p>
+</li>
+<li><p>慎用异常</p>
+<p>当创建一个异常时，需要收集一个栈跟踪(stack track)，这个栈跟踪用于描述异常是在何处创建的。</p>
+<p>构建这些栈跟踪时需要为运行时栈做一份快照，正是这一部分开销很大。</p>
+<p>当需要创建一个 Exception 时，JVM 不得不说：先别动，我想就您现在的样子存一份快照，所以暂时停止入栈和出栈操作。栈跟踪不只包含运行时栈中的一两个元素，而是包含这个栈中的每一个元素。</p>
+<p>如果您创建一个 Exception ，就得付出代价，好在捕获异常开销不大，因此可以使用 try-catch 将核心内容包起来。</p>
+<p>从技术上讲，你甚至可以随意地抛出异常，而不用花费很大的代价。招致性能损失的并不是 throw 操作——尽管在没有预先创建异常的情况下就抛出异常是有点不寻常。</p>
+<p>真正要花代价的是创建异常，幸运的是，好的编程习惯已教会我们，不应该不管三七二十一就抛出异常。异常是为异常的情况而设计的，使用时也应该牢记这一原则。</p>
+</li>
+<li><p>尽量重用对象</p>
+<p>特别是String对象的使用中，出现字符串连接情况时应使用StringBuffer代替，由于系统不仅要花时间生成对象，以后可能还需要花时间对这些对象进行垃圾回收和处理。因此生成过多的对象将会给程序的性能带来很大的影响。</p>
+</li>
+<li><p>不要重复初始化变量</p>
+<p>默认情况下，调用类的构造函数时，java会把变量初始化成确定的值，所有的对象被设置成null，整数变量设置成0，float和double变量设置成0.0，逻辑值设置成false。</p>
+<p>当一个类从另一个类派生时，这一点尤其应该注意，因为用new关键字创建一个对象时，构造函数链中的所有构造函数都会被自动调用。</p>
+<p>这里有个注意，给成员变量设置初始值但需要调用其他方法的时候，最好放在一个方法。比如initXXX()中，因为直接调用某方法赋值可能会因为类尚未初始化而抛空指针异常，如：public int state = this.getState()。</p>
+</li>
+<li><p>在java+Oracle的应用系统开发中，java中内嵌的SQL语言应尽量使用大写形式，以减少Oracle解析器的解析负担。</p>
+</li>
+<li><p>在java编程过程中，进行数据库连接，I/O流操作，在使用完毕后，及时关闭以释放资源。因为对这些大对象的操作会造成系统大的开销。</p>
+</li>
+<li><p>过分的创建对象会消耗系统的大量内存，严重时，会导致内存泄漏</p>
+<p>因此，保证过期的对象的及时回收具有重要意义。JVM的GC并非十分智能，因此建议在对象使用完毕后，手动设置成null。</p>
+</li>
+<li><p>不要在循环中使用Try/Catch语句，应把Try/Catch放在循环最外层</p>
+<p>Error是获取系统错误的类，或者说是虚拟机错误的类。不是所有的错误Exception都能获取到的，虚拟机报错Exception就获取不到，必须用Error获取。</p>
+</li>
+<li><p>array(数组)和ArrayList的使用</p>
+<p>array 数组效率最高，但容量固定，无法动态改变，ArrayList容量可以动态增长，但牺牲了效率。</p>
+</li>
+<li><p>单线程应尽量使用 HashMap, ArrayList,除非必要，否则不推荐使用HashTable,Vector，它们使用了同步机制，而降低了性能。</p>
+</li>
+<li><p>考虑使用静态方法，如果你没有必要去访问对象的外部，那么就使你的方法成为静态方法。它会被更快地调用，因为它不需要一个虚拟函数导向表。</p>
+<p>这同时也是一个很好的实践，因为它告诉你如何区分方法的性质，调用这个方法不会改变对象的状态。</p>
+</li>
+</ol>
+<p>34.避免枚举，浮点数的使用。</p>
+</div></article><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/">代码规范</a></div><nav id="pagination"><div class="next-post pull-right"><a href="/2021/08/12/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%94%A8%E5%B0%8F%E5%A5%97%E8%B7%AF%E4%B9%8BEffective-Java%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><span>代码实用小套路之Effective Java阅读笔记</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
+  clientID: '83850031ee87c27765eb',
+  clientSecret: '6c5e13a8b6670d5bfa85ba548ba3570cae29e671',
+  repo: 'blob-comment',
+  owner: 'hepeng0',
+  admin: 'hepeng0',
+  id: md5(decodeURI(location.pathname)),
+  language: 'zh-CN'
+})
+gitalk.render('gitalk-container')</script></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2018 - 2021 By 何鹏 [smile.hepeng@qq.com]</div><div class="framework-info"><span>Driven - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>Theme - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.9.0"></script><script src="/js/fancybox.js?version=1.9.0"></script><script src="/js/sidebar.js?version=1.9.0"></script><script src="/js/copy.js?version=1.9.0"></script><script src="/js/fireworks.js?version=1.9.0"></script><script src="/js/transition.js?version=1.9.0"></script><script src="/js/scroll.js?version=1.9.0"></script><script src="/js/head.js?version=1.9.0"></script><script src="/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">Local search</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>Powered by</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

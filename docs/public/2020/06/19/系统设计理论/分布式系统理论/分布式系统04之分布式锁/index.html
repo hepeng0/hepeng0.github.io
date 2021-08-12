@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="分布式系统04之分布式锁"><meta name="keywords" content="分布式,锁"><meta name="author" content="何鹏 [smile.hepeng@qq.com]"><meta name="copyright" content="何鹏 [smile.hepeng@qq.com]"><title>分布式系统04之分布式锁 | 沉默者</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.9.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.0"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css"><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  hexoVersion: '5.4.0'
+} </script><link rel="alternate" href="/atom.xml" title="沉默者" type="application/atom+xml">
+</head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="Toggle article">Toggle site</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">1.</span> <span class="toc-text">什么是分布式锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E9%9C%80%E6%B1%82"><span class="toc-number">2.</span> <span class="toc-text">Java分布式锁需求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">Java分布式锁解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">3.1.</span> <span class="toc-text">基于数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Eredis"><span class="toc-number">3.2.</span> <span class="toc-text">基于redis</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-redis-%E7%9A%84-SETNX-%E3%80%81EXPIRE-%E6%96%B9%E6%B3%95%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">3.2.1.</span> <span class="toc-text">基于 redis 的 SETNX()、EXPIRE() 方法做分布式锁</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-redis-%E7%9A%84-setnx-%E3%80%81get-%E5%92%8C-getset-%E6%96%B9%E6%B3%95%E6%9D%A5%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E3%80%82"><span class="toc-number">3.2.2.</span> <span class="toc-text">基于 redis 的 setnx()、get() 和 getset() 方法来实现分布式锁。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81Redlock"><span class="toc-number">3.2.3.</span> <span class="toc-text">分布式锁Redlock</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-REDISSON-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">3.2.4.</span> <span class="toc-text">基于 REDISSON 做分布式锁</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">3.3.</span> <span class="toc-text">zookeeper实现分布式锁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%92%8Czookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">4.</span> <span class="toc-text">redis分布式锁和zookeeper分布式锁的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9%E5%AF%B9%E6%AF%94"><span class="toc-number">4.1.</span> <span class="toc-text">优缺点对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="toc-number">4.2.</span> <span class="toc-text">技术选型</span></a></li></ol></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://img2.baidu.com/it/u=928705063,3876627980&amp;fm=26&amp;fmt=auto&amp;gp=0.jpg"></div><div class="author-info__name text-center">何鹏 [smile.hepeng@qq.com]</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">Articles</span><span class="pull-right">34</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">Tags</span><span class="pull-right">29</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">Categories</span><span class="pull-right">6</span></a></div></div></div><div id="content-outer"><div class="plain" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">沉默者</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> Search</span></a></span></div></div><div class="layout" id="content-inner"><article id="post"><div class="plain" id="post-title">分布式系统04之分布式锁</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2020-06-19</time><span class="post-meta__separator">|</span><i class="fa fa-inbox" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/JAVA%E5%BC%80%E5%8F%91/"> JAVA开发</a><span class="post-meta__separator">|</span><span class="post-meta-wordcount"><span>Word count: </span><span class="word-count">1.9k</span><span class="post-meta__separator">|</span><span>Reading time: 5 min</span></span></div><div class="article-container" id="post-content"><h2 id="什么是分布式锁"><a href="#什么是分布式锁" class="headerlink" title="什么是分布式锁"></a>什么是分布式锁</h2><ul>
+<li>分布式模型下，数据只有一份，需要锁技术控制某一时刻修改数据的进程数。 </li>
+<li>不仅需要保证进程可见，还需要考虑进程与锁的网络问题 </li>
+<li>可以将标记存在内存，但是内存不是进程分配而是公共内存（redis、zk）,保证标记互斥。</li>
+</ul>
+<h2 id="Java分布式锁需求"><a href="#Java分布式锁需求" class="headerlink" title="Java分布式锁需求"></a>Java分布式锁需求</h2><ul>
+<li>同一个方法在同一时间只能被一台机器上一个线程执行。</li>
+<li>可重入（避免死锁）</li>
+<li>阻塞锁（业务需求） </li>
+<li>公平锁（业务需求） </li>
+<li>高可用、高性能获取/释放锁</li>
+</ul>
+<h2 id="Java分布式锁解决方案"><a href="#Java分布式锁解决方案" class="headerlink" title="Java分布式锁解决方案"></a>Java分布式锁解决方案</h2><h3 id="基于数据库"><a href="#基于数据库" class="headerlink" title="基于数据库"></a>基于数据库</h3><p>基于表主键唯一做分布式锁</p>
+<h3 id="基于redis"><a href="#基于redis" class="headerlink" title="基于redis"></a>基于redis</h3><h4 id="基于-redis-的-SETNX-、EXPIRE-方法做分布式锁"><a href="#基于-redis-的-SETNX-、EXPIRE-方法做分布式锁" class="headerlink" title="基于 redis 的 SETNX()、EXPIRE() 方法做分布式锁"></a>基于 redis 的 SETNX()、EXPIRE() 方法做分布式锁</h4><p>使用步骤：</p>
+<ul>
+<li>setnx(lockkey, 1) 返回1，占位成功</li>
+<li>expire()对lockkey设置超时时间，避免死锁</li>
+<li>执行完业务后，delete命令删除key</li>
+</ul>
+<p>在 expire() 命令执行成功前，发生了宕机的现象，那么就依然会出现死锁的问题。</p>
+<h4 id="基于-redis-的-setnx-、get-和-getset-方法来实现分布式锁。"><a href="#基于-redis-的-setnx-、get-和-getset-方法来实现分布式锁。" class="headerlink" title="基于 redis 的 setnx()、get() 和 getset() 方法来实现分布式锁。"></a>基于 redis 的 setnx()、get() 和 getset() 方法来实现分布式锁。</h4><p>使用步骤</p>
+<ul>
+<li>setnx(lockkey, 当前时间+过期超时时间)，如果返回 1，则获取锁成功；如果返回 0 则没有获取到锁，转向 2。</li>
+<li>get(lockkey) 获取值 oldExpireTime ，并将这个 value 值与当前的系统时间进行比较，如果小于当前系统时间，则认为这个锁已经超时，可以允许别的请求重新获取，转向 3。</li>
+<li>计算 newExpireTime = 当前时间+过期超时时间，然后 getset(lockkey, newExpireTime) 会返回当前 lockkey 的值currentExpireTime。</li>
+<li>判断 currentExpireTime 与 oldExpireTime 是否相等，如果相等，说明当前 getset 设置成功，获取到了锁。如果不相等，说明这个锁又被别的请求获取走了，那么当前请求可以直接返回失败，或者继续重试。</li>
+<li>在获取到锁之后，当前线程可以开始自己的业务处理，当处理完毕后，比较自己的处理时间和对于锁设置的超时时间，如果小于锁设置的超时时间，则直接执行 delete 释放锁；如果大于锁设置的超时时间，则不需要再锁进行处理。</li>
+</ul>
+<h4 id="分布式锁Redlock"><a href="#分布式锁Redlock" class="headerlink" title="分布式锁Redlock"></a>分布式锁Redlock</h4><p>解决问题：<br>解决redis分布式锁的单点故障问题</p>
+<p>使用步骤：</p>
+<ul>
+<li>获取当前时间（毫秒数）。</li>
+<li>按顺序依次向N个Redis节点执行获取锁的操作。这个获取操作跟前面基于单Redis节点的获取锁的过程相同，包含随机字符串my_random_value，也包含过期时间(比如PX 30000，即锁的有效时间)。为了保证在某个Redis节点不可用的时候算法能够继续运行，这个获取锁的操作还有一个超时时间(time out)，它要远小于锁的有效时间（几十毫秒量级）。客户端在向某个Redis节点获取锁失败以后，应该立即尝试下一个Redis节点。这里的失败，应该包含任何类型的失败，比如该Redis节点不可用，或者该Redis节点上的锁已经被其它客户端持有（注：Redlock原文中这里只提到了Redis节点不可用的情况，但也应该包含其它的失败情况）。</li>
+<li>计算整个获取锁的过程总共消耗了多长时间，计算方法是用当前时间减去第1步记录的时间。如果客户端从大多数Redis节点（&gt;= N/2+1）成功获取到了锁，并且获取锁总共消耗的时间没有超过锁的有效时间(lock validity time)，那么这时客户端才认为最终获取锁成功；否则，认为最终获取锁失败。</li>
+<li>如果最终获取锁成功了，那么这个锁的有效时间应该重新计算，它等于最初的锁的有效时间减去第3步计算出来的获取锁消耗的时间。</li>
+<li>如果最终获取锁失败了（可能由于获取到锁的Redis节点个数少于N/2+1，或者整个获取锁的过程消耗的时间超过了锁的最初有效时间），那么客户端应该立即向所有Redis节点发起释放锁的操作（即前面介绍的Redis Lua脚本）。</li>
+</ul>
+<h4 id="基于-REDISSON-做分布式锁"><a href="#基于-REDISSON-做分布式锁" class="headerlink" title="基于 REDISSON 做分布式锁"></a>基于 REDISSON 做分布式锁</h4><p>redis 官方的分布式锁组件，解决超时时间设置不合理问题。每获得一个锁时，只设置一个很短的超时时间，同时起一个线程在每次快要到超时时间时去刷新锁的超时时间。在释放锁的同时结束这个线程。</p>
+<h3 id="zookeeper实现分布式锁"><a href="#zookeeper实现分布式锁" class="headerlink" title="zookeeper实现分布式锁"></a>zookeeper实现分布式锁</h3><p>其实基于ZooKeeper，就是使用它的临时有序节点来实现的分布式锁。</p>
+<p><img src="/2020/06/19/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E7%90%86%E8%AE%BA/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%90%86%E8%AE%BA/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F04%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/img_1.png" alt><br>当某客户端要进行逻辑的加锁时，就在zookeeper上的某个指定节点的目录下，去生成一个唯一的临时有序节点， 然后判断自己是否是这些有序节点中序号最小的一个。</p>
+<ul>
+<li>如果是，则算是获取了锁。</li>
+<li>如果不是，则说明没有获取到锁，那么就需要在序列中找到比自己小的那个节点，并对其调用exist()方法，对其注册事件监听，当监听到这个节点被删除了，那就再去判断一次自己当初创建的节点是否变成了序列中最小的。<ul>
+<li>如果是，则获取锁，如果不是，则重复上述步骤。</li>
+</ul>
+</li>
+</ul>
+<p>当释放锁的时候，只需将这个临时节点删除即可。</p>
+<h2 id="redis分布式锁和zookeeper分布式锁的区别"><a href="#redis分布式锁和zookeeper分布式锁的区别" class="headerlink" title="redis分布式锁和zookeeper分布式锁的区别"></a>redis分布式锁和zookeeper分布式锁的区别</h2><h3 id="优缺点对比"><a href="#优缺点对比" class="headerlink" title="优缺点对比"></a>优缺点对比</h3><p>对于redis的分布式锁而言：</p>
+<ul>
+<li><p>它获取锁的方式简单粗暴，获取不到锁直接不断尝试获取锁，比较消耗性能。</p>
+</li>
+<li><p>redis的设计定位决定了它的数据并不是强一致性的，在某些极端情况下，可能会出现问题。锁的模型不够健壮</p>
+<ul>
+<li>即便使用redlock算法来实现，在某些复杂场景下，也无法保证其实现100%没有问题，关于redlock的讨论可以看How to do distributed locking</li>
+</ul>
+</li>
+</ul>
+<p>但是另一方面使用redis实现分布式锁在很多企业中非常常见，而且大部分情况下都不会遇到所谓的“极端复杂场景”</p>
+<p>所以使用redis作为分布式锁也不失为一种好的方案，最重要的一点是redis的性能很高，可以支撑高并发的获取、释放锁操作。</p>
+<p>对于zk分布式锁而言:</p>
+<ul>
+<li><p>zookeeper天生设计定位就是分布式协调，强一致性。锁的模型健壮、简单易用、适合做分布式锁。</p>
+</li>
+<li><p>如果获取不到锁，只需要添加一个监听器就可以了，不用一直轮询，性能消耗较小。</p>
+</li>
+</ul>
+<p>但是zk也有其缺点：如果有较多的客户端频繁的申请加锁、释放锁，对于zk集群的压力会比较大。</p>
+<h3 id="技术选型"><a href="#技术选型" class="headerlink" title="技术选型"></a>技术选型</h3><p>就个人而言的话，我<strong>比较推崇zk实现的锁</strong>：</p>
+<p>因为redis是有可能存在隐患的，可能会导致数据不对的情况。但是，怎么选用要看具体在公司的场景了。</p>
+<p>如果公司里面有zk集群条件，优先选用zk实现，但是如果说公司里面只有redis集群，没有条件搭建zk集群。</p>
+<p>那么其实用redis来实现也可以，另外还可能是系统设计者考虑到了系统已经有redis，但是又不希望再次引入一些外部依赖的情况下，可以选用redis。</p>
+</div></article><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><a class="post-meta__tags" href="/tags/%E9%94%81/">锁</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2020/06/25/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E4%B9%8BBigDecimal%E7%9A%84equals%E6%96%B9%E6%B3%95%E7%AD%89%E5%80%BC%E6%AF%94%E8%BE%83%E5%BC%95%E5%9D%91/"><i class="fa fa-chevron-left">  </i><span>代码规范之BigDecimal的equals方法等值比较引坑</span></a></div><div class="next-post pull-right"><a href="/2020/06/18/%E6%9D%82%E9%A1%B9%E7%AC%94%E8%AE%B0/JAVA%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E5%85%A8%E5%A5%97%E8%B7%AF/"><span>JAVA线上故障排查全套路</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
+  clientID: '83850031ee87c27765eb',
+  clientSecret: '6c5e13a8b6670d5bfa85ba548ba3570cae29e671',
+  repo: 'blob-comment',
+  owner: 'hepeng0',
+  admin: 'hepeng0',
+  id: md5(decodeURI(location.pathname)),
+  language: 'zh-CN'
+})
+gitalk.render('gitalk-container')</script></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2018 - 2021 By 何鹏 [smile.hepeng@qq.com]</div><div class="framework-info"><span>Driven - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>Theme - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.9.0"></script><script src="/js/fancybox.js?version=1.9.0"></script><script src="/js/sidebar.js?version=1.9.0"></script><script src="/js/copy.js?version=1.9.0"></script><script src="/js/fireworks.js?version=1.9.0"></script><script src="/js/transition.js?version=1.9.0"></script><script src="/js/scroll.js?version=1.9.0"></script><script src="/js/head.js?version=1.9.0"></script><script src="/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">Local search</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>Powered by</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>
