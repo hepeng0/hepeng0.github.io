@@ -91,6 +91,7 @@
 package com.hepeng.example.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.RandomStringGenerator;
 
 import java.io.PrintWriter;
@@ -250,30 +251,11 @@ public final class CommonUtils {
         return String.valueOf(destArray);
     }
 
-
-    /**
-     * 提取堆栈信息
-     * <p>
-     *     等价于{@link org.apache.commons.lang3.exception.ExceptionUtils#getStackTrace(Throwable)}
-     * </p>
-     */
-    public static String extractStackTrace(Throwable cause){
-        //ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-        //cause.printStackTrace(new PrintStream(byteArrayOut));
-        //return byteArrayOut.toString();
-        StringWriter sw = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(sw)) {
-            cause.printStackTrace(pw);
-            return sw.toString();
-        }
-    }
-
-
     /**
      * 提取堆栈轨迹中的真实异常
      */
     public static String extractStackTraceCausedBy(Throwable cause){
-        String allMsg = extractStackTrace(cause);
+        String allMsg = ExceptionUtils.getStackTrace(cause);
         if(allMsg.contains("Caused by: ")){
             allMsg = allMsg.substring(allMsg.lastIndexOf("Caused by: ") + 11);
         }
